@@ -62,7 +62,7 @@ def initial_population_generator_ksp(amount, dim, validator=validate,
     population = []
     while len(population) < amount:
         population_candidate = state_generator(dim)
-        if validator(population_candidate, kwargs["costs"], kwargs["weights"], kwargs["size"]):
+        if validator(population_candidate, **kwargs):
             population.append(population_candidate)
     return population
 
@@ -85,6 +85,3 @@ def minimize(dimension,
             max_fitness = current_max_fitness
             iteration = 0
     return population[max_fitness_state_index]
-
-
-print(minimize(5, costs=[1, 2, 3, 4, 5], weights=[5, 5, 5, 5, 5], size=10))

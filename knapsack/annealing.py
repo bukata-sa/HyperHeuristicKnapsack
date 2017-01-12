@@ -1,11 +1,11 @@
 import random as rand
-from math import exp
+from math import exp, sqrt
 
 from knapsack.problem import solve, validate
 
 
 def temperature_ksp(t, iteration):
-    return t * 0.1 / iteration
+    return sqrt(t)
 
 
 def change_state_candidate_ksp(validator, seq, **kwargs):
