@@ -3,7 +3,7 @@ from random import shuffle, randint
 from knapsack.problem import *
 
 
-def add_random(size, weights, costs, current):
+def add_random(size, weights, costs, current, validation=True):
     indexes = list(range(len(weights)))
     shuffle(indexes)
     while len(indexes) > 0:
@@ -14,12 +14,12 @@ def add_random(size, weights, costs, current):
             continue
 
         result[candidate_index] = 1
-        if validate(result, costs, weights, size):
+        if not validation or validate(result, costs, weights, size):
             return result
     return current
 
 
-def add_best(size, weights, costs, current):
+def add_best(size, weights, costs, current, validation=True):
     priorities = list(map(lambda x: x[0] / float(x[1]), zip(costs, weights)))
     index_priorities = list(zip(range(len(weights)), priorities))
     index_priorities.sort(key=lambda x: x[1])
@@ -32,7 +32,7 @@ def add_best(size, weights, costs, current):
             continue
 
         result[candidate_index] = 1
-        if validate(result, costs, weights, size):
+        if not validation or validate(result, costs, weights, size):
             return result
     return current
 
