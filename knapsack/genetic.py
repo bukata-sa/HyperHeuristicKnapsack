@@ -4,20 +4,20 @@ import algorithms as algs
 import knapsack.problem as ksp
 
 
-def simple_state_generator_ksp(dim):
+def simple_state_generator_ksp(dimension):
     state = []
-    for i in range(0, dim):
+    for i in range(0, dimension):
         random_boolean = False if rnd.randint(0, 1) == 0 else True
         state.append(random_boolean)
     return state
 
 
-def initial_population_generator_ksp(amount, dim, validator=ksp.validate,
+def initial_population_generator_ksp(amount, dimension, validator=ksp.validate,
                                      state_generator=simple_state_generator_ksp,
                                      **kwargs):
     population = []
     while len(population) < amount:
-        population_candidate = state_generator(dim)
+        population_candidate = state_generator(dimension)
         if validator(population_candidate, **kwargs):
             population.append(population_candidate)
     return population
