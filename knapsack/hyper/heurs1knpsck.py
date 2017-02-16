@@ -1,70 +1,92 @@
-from random import shuffle, randint
+import operator
 
 from knapsack.problem import *
 
 
-def add_random(current, validation=True, **kwargs):
-    indexes = list(range(len(kwargs["weights"])))
-    shuffle(indexes)
-    while len(indexes) > 0:
-        result = list(current)
-        candidate_index = indexes.pop()
+def diffed_index(state1, state2):
+    subtract = np.subtract(state1, state2)
+    diffed = np.where(subtract != 0)
+    result = int(diffed[0]) if len(diffed[0]) > 0 else -1
+    return result
 
-        if result[candidate_index] != 0:
+
+# def tabu_operation_chain(current, **kwargs):
+#     success = False
+#     operation_list = [add_lightest, add_heaviest, add_least_cost, add_most_cost, add_best, remove_lightest,
+#                       remove_heaviest, remove_least_cost, remove_most_cost, remove_worst]
+#     add_operation = add_lightest
+#     result = add_operation(list(current), validation=False, **kwargs)
+#     taboed_item = diffed_index(result, current)
+#     taboed_weights = list(kwargs["weights"])
+#     taboed_weights[taboed_item] = 0
+#     while not success:
+#         next_operation = operation_list[randint(0, len(operation_list) - 1)]
+#         state_candidate = next_operation(result, costs=kwargs["costs"], weights=taboed_weights, size=kwargs["size"])
+#         if taboed_item != diffed_index(result, state_candidate):
+#             result = state_candidate
+#             success = True
+#     result[taboed_item] = 0
+#     return result
+
+
+def update_ksp_extreme_property(current, is_add, is_max, properties, validation=True, **kwargs):
+    index_property_list = [element for element in enumerate(properties)]
+    indexes_property_sorted = [index[0] for index in
+                               sorted(index_property_list, key=operator.itemgetter(1), reverse=not is_max)]
+    while len(indexes_property_sorted) > 0:
+        result = list(current)
+        candidate_index = indexes_property_sorted.pop()
+
+        if result[candidate_index] == is_add:
             continue
 
-        result[candidate_index] = 1
-        if not validation or validate(result, kwargs["costs"], kwargs["weights"], kwargs["size"]):
+        result[candidate_index] = int(is_add)
+        if not validation or not is_add or validate(result, **kwargs):
             return result
     return current
+
+
+def add_lightest(current, validation=True, **kwargs):
+    return update_ksp_extreme_property(current, True, False, kwargs["weights"], validation=validation, **kwargs)
+
+
+def add_heaviest(current, validation=True, **kwargs):
+    return update_ksp_extreme_property(current, True, True, kwargs["weights"], validation=validation, **kwargs)
+
+
+def remove_lightest(current, validation=True, **kwargs):
+    return update_ksp_extreme_property(current, False, False, kwargs["weights"], validation=validation, **kwargs)
+
+
+def remove_heaviest(current, validation=True, **kwargs):
+    return update_ksp_extreme_property(current, False, True, kwargs["weights"], validation=validation, **kwargs)
+
+
+def add_least_cost(current, validation=True, **kwargs):
+    return update_ksp_extreme_property(current, True, False, kwargs["costs"], validation=validation, **kwargs)
+
+
+def add_most_cost(current, validation=True, **kwargs):
+    return update_ksp_extreme_property(current, True, True, kwargs["costs"], validation=validation, **kwargs)
+
+
+def remove_least_cost(current, validation=True, **kwargs):
+    return update_ksp_extreme_property(current, False, False, kwargs["costs"], validation=validation, **kwargs)
+
+
+def remove_most_cost(current, validation=True, **kwargs):
+    return update_ksp_extreme_property(current, False, True, kwargs["costs"], validation=validation, **kwargs)
+
+
+def weight_cost_priority_list(costs, weights):
+    return list(map(lambda x: x[0] / float(x[1]) if x[1] != 0 else np.inf, zip(costs, weights)))
 
 
 def add_best(current, validation=True, **kwargs):
-    priorities = list(map(lambda x: x[0] / float(x[1]), zip(kwargs["costs"], kwargs["weights"])))
-    index_priorities = list(zip(range(len(kwargs["weights"])), priorities))
-    index_priorities.sort(key=lambda x: x[1])
-
-    while len(index_priorities) > 0:
-        result = list(current)
-        candidate_index, _ = index_priorities.pop()
-
-        if result[candidate_index] != 0:
-            continue
-
-        result[candidate_index] = 1
-        if not validation or validate(result, kwargs["costs"], kwargs["weights"], kwargs["size"]):
-            return result
-    return current
+    priorities = weight_cost_priority_list(kwargs["costs"], kwargs["weights"])
+    return update_ksp_extreme_property(current, True, True, priorities, validation=validation, **kwargs)
 
 
-def remove_random(current, **kwargs):
-    indexes = [i for i in range(len(current)) if current[i] == 1]
-
-    if len(indexes) == 0:
-        return current
-
-    delete_index = indexes[randint(0, len(indexes) - 1)]
-    current[delete_index] = 0
-    return current
-
-
-def remove_worst(current, **kwargs):
-    indexes = [i for i in range(len(current)) if current[i] == 1]
-    if len(indexes) == 0:
-        return current
-    included_weights = [weight for i, weight in enumerate(kwargs["weights"]) if current[i] == 1]
-    included_costs = [cost for i, cost in enumerate(kwargs["costs"]) if current[i] == 1]
-    priorities = list(map(lambda x: x[0] / float(x[1]), zip(included_costs, included_weights)))
-    index_priorities = list(zip(indexes, priorities))
-    min_priority_index = min(index_priorities, key=lambda x: x[1])[0]
-    current[min_priority_index] = 0
-    return current
-
-# size = 165
-# weights = [23, 31, 29, 44, 53, 38, 63, 85, 89, 82]
-# costs = [92, 57, 49, 68, 60, 43, 67, 84, 87, 72]
-# current = [1, 0, 0, 0, 0, 0, 0, 0, 0, 1]
-# print(add_random(list(current), size=size, weights=weights, costs=costs))
-# print(add_best(list(current), size=size, weights=weights, costs=costs))
-# print(remove_random(list(current), size=size, weights=weights, costs=costs))
-# print(remove_worst(list(current), size=size, weights=weights, costs=costs))
+def remove_worst(current, validation=True, **kwargs):
+    priorities = weight_cost_priority_list(kwargs["costs"], kwargs["weights"])
+    return update_ksp_extreme_property(current, False, False, priorities, validation=validation, **kwargs)

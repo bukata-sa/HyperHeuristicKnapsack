@@ -7,7 +7,9 @@ import knapsack.problem as problem
 
 def simple_state_generator_hyper_ksp(dimension):
     state = []
-    candidates = [heurs.add_random, heurs.add_best, heurs.remove_random, heurs.remove_worst]
+    candidates = [heurs.add_lightest, heurs.add_heaviest, heurs.add_least_cost, heurs.add_most_cost, heurs.add_best,
+                  heurs.remove_lightest, heurs.remove_heaviest, heurs.remove_least_cost, heurs.remove_most_cost,
+                  heurs.remove_worst, """heurs.tabu_operation_chain"""]
     while len(state) < dimension:
         index = rnd.randint(0, len(candidates) - 1)
         state.append(candidates[index])
@@ -33,7 +35,7 @@ def crossover_reproduction_hyper_ksp(first_parent, second_parent, **kwargs):
 def fitness_hyper_ksp(state, **kwargs):
     included = list(kwargs["included"])
     for action in state:
-        included = action(included, **kwargs)
+        included = action(included, costs=kwargs["costs"], weights=kwargs["weights"], size=kwargs["size"])
     return problem.solve(included, costs=kwargs["costs"], weights=kwargs["weights"], size=kwargs["size"])
 
 
