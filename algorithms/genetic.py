@@ -11,13 +11,11 @@ def crossover_selection(population, fitness_func, crossover_reproduction_func, *
         iteration += 1
         first_parent_index = rnd.randint(0, len(population) - 1)
         second_parent_index = rnd.randint(0, len(population) - 1)
-        first_parent = population[first_parent_index]
-        second_parent = population[second_parent_index]
-        if (first_parent_index != second_parent_index and not first_parent == second_parent) \
-                or iteration > len(population) ** 2:
-            first_parent = None
-            second_parent = None
-        break
+        if (first_parent_index != second_parent_index and not
+            population[first_parent_index] == population[second_parent_index]):
+            first_parent = population[first_parent_index]
+            second_parent = population[second_parent_index]
+            break
 
     if first_parent is None or second_parent is None:
         return
