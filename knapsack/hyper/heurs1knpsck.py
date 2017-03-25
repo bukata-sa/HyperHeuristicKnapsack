@@ -3,13 +3,6 @@ import operator
 from knapsack.problem import *
 
 
-def diffed_index(state1, state2):
-    subtract = np.subtract(state1, state2)
-    diffed = np.where(subtract != 0)
-    result = int(diffed[0]) if len(diffed[0]) > 0 else -1
-    return result
-
-
 def update_ksp_extreme_property(current, is_add, is_max, properties, tabooed_indexes=None, **kwargs):
     index_property_list = [element for element in enumerate(properties)]
     indexes_property_sorted = [index[0] for index in

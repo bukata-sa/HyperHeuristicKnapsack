@@ -42,6 +42,8 @@ def fitness_hyper_ksp(state, **kwargs):
         included, modified_index = operation(included, tabooed_indexes=tabooed_items, costs=kwargs["costs"],
                                              weights=kwargs["weights"], size=kwargs["size"])
         tabooed_items_generations = list(map(lambda x: x - 1 if x > 0 else 0, tabooed_items_generations))
+
+        # TODO if modified index is -1, should we exclude the operation from the state?
         if tabu_generation > 0 and modified_index >= 0:
             tabooed_items_generations[modified_index] = tabu_generation
     return problem.solve(included, costs=kwargs["costs"], weights=kwargs["weights"], size=kwargs["size"])

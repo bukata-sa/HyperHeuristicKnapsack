@@ -35,7 +35,8 @@ def crossover_selection(population, fitness_func, crossover_reproduction_func, *
 
 
 def minimize(dimension, initial_population_generator, crossover_reproduction, fitness_func, **kwargs):
-    population = initial_population_generator(30, dimension, **kwargs)
+    # TODO how ti initialize population amount?
+    population = initial_population_generator(100, dimension, **kwargs)
     max_fitness = 0
     iteration = 0
     while iteration < 100:
