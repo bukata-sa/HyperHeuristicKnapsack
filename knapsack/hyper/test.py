@@ -10,7 +10,7 @@ optimal = [1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 
 
 result = 0
 for i in range(0, 50):
-    optimal_funcs = hyper_gene.minimize(10, weights=weights, costs=costs, size=size, included=start)
+    optimal_funcs = hyper_gene.minimize(50, weights=weights, costs=costs, size=size, included=start)
     current = hyper_gene.fitness_hyper_ksp(optimal_funcs, weights=weights, costs=costs, size=size, included=start)
     print(13549094 - current)
     result += 13549094 - current
