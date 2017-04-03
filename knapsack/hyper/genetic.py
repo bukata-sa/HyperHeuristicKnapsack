@@ -13,7 +13,7 @@ def simple_state_generator_hyper_ksp(dimension):
     while len(state) < dimension:
         index = rnd.randint(0, len(candidates) - 1)
         probability = rnd.random()
-        tabu_generation = rnd.randint(1, 6) if probability < 0.2 else 0
+        tabu_generation = rnd.randint(3, 6) if probability < 0.35 else 0
         state.append((candidates[index], tabu_generation))
     return state
 
