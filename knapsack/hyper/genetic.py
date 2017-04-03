@@ -22,7 +22,8 @@ def initial_population_generator_hyper_ksp(amount, dimension, state_generator=si
                                            **kwargs):
     population = []
     while len(population) < amount:
-        population.append(state_generator(dimension))
+        state = state_generator(dimension)
+        population.append((state, fitness_hyper_ksp(state, **kwargs)))
     return population
 
 
