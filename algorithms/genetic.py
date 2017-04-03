@@ -9,8 +9,8 @@ def crossover_selection(population, fitness_func, crossover_reproduction_func, *
     first_parent = None
     second_parent = None
 
-    mean = np.mean(list(map(operator.itemgetter(1), population)))
-    top_half_individuals = list(filter(lambda x: x[1] > mean, population))
+    mean = np.mean(list(map(operator.itemgetter("fitness"), population)))
+    top_half_individuals = list(filter(lambda x: x["fitness"] > mean, population))
 
     while iteration < 100:
         iteration += 1
@@ -19,8 +19,8 @@ def crossover_selection(population, fitness_func, crossover_reproduction_func, *
 
         if first_parent_index != second_parent_index and not \
                         top_half_individuals[first_parent_index] == top_half_individuals[second_parent_index]:
-            first_parent = population[first_parent_index][0]
-            second_parent = population[second_parent_index][0]
+            first_parent = population[first_parent_index]["heuristics"]
+            second_parent = population[second_parent_index]["heuristics"]
             break
 
     if first_parent is None or second_parent is None:
@@ -32,7 +32,7 @@ def crossover_selection(population, fitness_func, crossover_reproduction_func, *
         return
 
     # TODO: mutate child
-    population.append((child, fitness_func(child, **kwargs)))
+    population.append({"heuristics": child, "fitness": fitness_func(child, **kwargs)})
 
 
 def minimize(dimension, initial_population_generator, crossover_reproduction, fitness_func, **kwargs):
@@ -43,11 +43,11 @@ def minimize(dimension, initial_population_generator, crossover_reproduction, fi
     # TODO finish condition?
     while iteration < 50:
         crossover_selection(population, fitness_func, crossover_reproduction, **kwargs)
-        max_fitness_state_index = np.argmax([fitness for state, fitness in population])
-        current_max_fitness = population[max_fitness_state_index][1]
+        max_fitness_state_index = np.argmax([individual["fitness"] for individual in population])
+        current_max_fitness = population[max_fitness_state_index]["fitness"]
         if max_fitness >= current_max_fitness:
             iteration += 1
         else:
             max_fitness = current_max_fitness
             iteration = 0
-    return population[max_fitness_state_index][0]
+    return population[max_fitness_state_index]["heuristics"]
