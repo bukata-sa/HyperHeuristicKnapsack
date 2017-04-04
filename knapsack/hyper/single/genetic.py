@@ -4,12 +4,8 @@ import algorithms.genetic as gene
 import knapsack.hyper.single.heurs1knpsck as heurs
 import knapsack.hyper.single.problem as problem
 
-heuristics_candidates = [heurs.add_lightest, heurs.add_heaviest, heurs.add_least_cost, heurs.add_most_cost,
-                         heurs.add_best, heurs.remove_lightest, heurs.remove_heaviest, heurs.remove_least_cost,
-                         heurs.remove_most_cost, heurs.remove_worst]
 
-
-def simple_state_generator_hyper_ksp(dimension):
+def simple_state_generator_hyper_ksp(dimension, heuristics_candidates):
     state = []
     while len(state) < dimension:
         index = rnd.randint(0, len(heuristics_candidates) - 1)
@@ -22,8 +18,11 @@ def simple_state_generator_hyper_ksp(dimension):
 def initial_population_generator_hyper_ksp(amount, dimension, state_generator=simple_state_generator_hyper_ksp,
                                            **kwargs):
     population = []
+    heuristics_candidates = [heurs.add_lightest, heurs.add_heaviest, heurs.add_least_cost, heurs.add_most_cost,
+                             heurs.add_best, heurs.remove_lightest, heurs.remove_heaviest, heurs.remove_least_cost,
+                             heurs.remove_most_cost, heurs.remove_worst]
     while len(population) < amount:
-        state = state_generator(dimension)
+        state = state_generator(dimension, heuristics_candidates)
         population.append({"heuristics": state, "fitness": fitness_hyper_ksp(state, **kwargs)})
     return population
 
