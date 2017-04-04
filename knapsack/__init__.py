@@ -1,1 +1,1 @@
-from . import problem
+from knapsack.hyper.single import problem

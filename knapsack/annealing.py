@@ -1,7 +1,7 @@
 import random as rand
 from math import exp, sqrt
 
-from knapsack.problem import solve, validate
+from knapsack.hyper.single.problem import solve, validate
 
 
 def temperature_ksp(t, iteration):

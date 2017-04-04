@@ -1,6 +1,6 @@
 import operator
 
-from knapsack.problem import *
+from knapsack.hyper.single.problem import *
 
 
 def update_ksp_extreme_property(current, is_add, is_max, properties, tabooed_indexes=None, **kwargs):

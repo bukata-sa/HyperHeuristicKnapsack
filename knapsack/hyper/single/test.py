@@ -1,5 +1,5 @@
 import knapsack.hyper.single.genetic as hyper_gene
-from knapsack import problem
+from knapsack.hyper.single import problem
 
 size = 6404180
 weights = [382745, 799601, 909247, 729069, 467902, 44328, 34610, 698150, 823460, 903959, 853665, 551830, 610856, 670702,

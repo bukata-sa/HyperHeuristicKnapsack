@@ -1,7 +1,7 @@
 import random as rnd
 
 import algorithms as algs
-import knapsack.problem as ksp
+import knapsack.hyper.single.problem as ksp
 
 
 def simple_state_generator_ksp(dimension):
