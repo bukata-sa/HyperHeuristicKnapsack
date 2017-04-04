@@ -18,9 +18,7 @@ def simple_state_generator_hyper_ksp(dimension, heuristics_candidates):
 def initial_population_generator_hyper_ksp(amount, dimension, state_generator=simple_state_generator_hyper_ksp,
                                            **kwargs):
     population = []
-    heuristics_candidates = [heurs.add_lightest, heurs.add_heaviest, heurs.add_least_cost, heurs.add_most_cost,
-                             heurs.add_best, heurs.remove_lightest, heurs.remove_heaviest, heurs.remove_least_cost,
-                             heurs.remove_most_cost, heurs.remove_worst]
+    heuristics_candidates = heurs.get_all_single_heuristics()
     while len(population) < amount:
         state = state_generator(dimension, heuristics_candidates)
         population.append({"heuristics": state, "fitness": fitness_hyper_ksp(state, **kwargs)})

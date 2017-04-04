@@ -23,7 +23,7 @@ if __name__ == '__main__':
     for i in range(1, 50):
         optimal_funcs = genetic.minimize(50, weights=weights, costs=costs, sizes=sizes, included=start)
         current = genetic.fitness_hyper_ksp(optimal_funcs, weights=weights, costs=costs, sizes=sizes, included=start)
-        print("Current:\t" + str(13549094 - current))
+        print("Current:\t" + str(3800 - current))
         result += 13549094 - current
         current_gap = 100 * (optimal_cost - current) / optimal_cost
         print("Normalized:\t" + str(current_gap))

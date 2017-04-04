@@ -1,6 +1,7 @@
 import random as rnd
 
 from algorithms import genetic as gene
+from knapsack.hyper.multi import heuristics as heurs
 from knapsack.hyper.multi import problem
 from knapsack.hyper.single.genetic import simple_state_generator_hyper_ksp
 
@@ -12,13 +13,13 @@ def fitness_hyper_ksp(state, **kwargs):
     for operation, tabu_generation in state:
         tabooed_items = [index for index, generation in enumerate(tabooed_items_generations) if generation > 0]
         included, modified_index = operation(included, tabooed_indexes=tabooed_items, costs=kwargs["costs"],
-                                             weights=kwargs["weights"], size=kwargs["size"])
+                                             weights=kwargs["weights"], sizes=kwargs["sizes"])
         tabooed_items_generations = list(map(lambda x: x - 1 if x > 0 else 0, tabooed_items_generations))
 
         # TODO if modified index is -1, should we exclude the operation from the state?
         if tabu_generation > 0 and modified_index >= 0:
             tabooed_items_generations[modified_index] = tabu_generation
-    return problem.solve(included, costs=kwargs["costs"], weights=kwargs["weights"], sizes=kwargs["size"])
+    return problem.solve(included, costs=kwargs["costs"], weights=kwargs["weights"], sizes=kwargs["sizes"])
 
 
 def crossover_reproduction_hyper_ksp(first_parent, second_parent, **kwargs):
@@ -31,7 +32,7 @@ def crossover_reproduction_hyper_ksp(first_parent, second_parent, **kwargs):
 
 def initial_population_generator_hyper_ksp(amount, dimension, **kwargs):
     population = []
-    heuristics_candidates = []
+    heuristics_candidates = heurs.get_single_heurs_for_knapsack_with_least_cost()
     for i in range(amount):
         state = simple_state_generator_hyper_ksp(dimension, heuristics_candidates)
         population.append({"heuristics": state, "fitness": fitness_hyper_ksp(state, **kwargs)})
