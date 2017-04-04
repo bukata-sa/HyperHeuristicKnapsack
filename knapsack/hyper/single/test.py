@@ -1,4 +1,4 @@
-import knapsack.hyper.genetic as hyper_gene
+import knapsack.hyper.single.genetic as hyper_gene
 from knapsack import problem
 
 size = 6404180

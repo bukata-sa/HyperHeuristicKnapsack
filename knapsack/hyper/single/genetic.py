@@ -1,7 +1,7 @@
 import random as rnd
 
 import algorithms.genetic as gene
-import knapsack.hyper.heurs1knpsck as heurs
+import knapsack.hyper.single.heurs1knpsck as heurs
 import knapsack.problem as problem
 
 heuristics_candidates = [heurs.add_lightest, heurs.add_heaviest, heurs.add_least_cost, heurs.add_most_cost,
