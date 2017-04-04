@@ -4,17 +4,18 @@ import algorithms.genetic as gene
 import knapsack.hyper.heurs1knpsck as heurs
 import knapsack.problem as problem
 
+heuristics_candidates = [heurs.add_lightest, heurs.add_heaviest, heurs.add_least_cost, heurs.add_most_cost,
+                         heurs.add_best, heurs.remove_lightest, heurs.remove_heaviest, heurs.remove_least_cost,
+                         heurs.remove_most_cost, heurs.remove_worst]
+
 
 def simple_state_generator_hyper_ksp(dimension):
     state = []
-    candidates = [heurs.add_lightest, heurs.add_heaviest, heurs.add_least_cost, heurs.add_most_cost, heurs.add_best,
-                  heurs.remove_lightest, heurs.remove_heaviest, heurs.remove_least_cost, heurs.remove_most_cost,
-                  heurs.remove_worst]
     while len(state) < dimension:
-        index = rnd.randint(0, len(candidates) - 1)
+        index = rnd.randint(0, len(heuristics_candidates) - 1)
         probability = rnd.random()
         tabu_generation = rnd.randint(3, 6) if probability < 0.35 else 0
-        state.append((candidates[index], tabu_generation))
+        state.append((heuristics_candidates[index], tabu_generation))
     return state
 
 
@@ -35,6 +36,50 @@ def crossover_reproduction_hyper_ksp(first_parent, second_parent, **kwargs):
     return child_candidate
 
 
+# probability 0.6 that state won't be changed
+# probability 0.4 that at least one mutation will be applied
+def mutation_hyper_ksp(state, **kwargs):
+    # mutate heuristics order with tabu (reorder tuples)
+    if rnd.random() < 0.12:
+        shuffle_start_index = rnd.randint(0, len(state) - 5)
+        to_shuffle = state[shuffle_start_index:shuffle_start_index + 5]
+        rnd.shuffle(to_shuffle)
+        state[shuffle_start_index:shuffle_start_index + 5] = to_shuffle
+
+    # mutate heuristics (replace with random)
+    if rnd.random() < 0.12:
+        heurs_indexes_to_update = rnd.sample(range(len(state)), 5)
+        while len(heurs_indexes_to_update) > 0:
+            index = heurs_indexes_to_update.pop()
+            heurs, tabu = state[index]
+            candidate_heurs = rnd.choice(heuristics_candidates)
+            while candidate_heurs == heurs:
+                candidate_heurs = rnd.choice(heuristics_candidates)
+            state[index] = candidate_heurs, tabu
+
+    # mutate tabu indexes
+    if rnd.random() < 0.12:
+        tabu_indexes_to_update = rnd.sample(range(len(state)), 5)
+        while len(tabu_indexes_to_update) > 0:
+            index = tabu_indexes_to_update.pop()
+            heurs, tabu = state[index]
+            candidate_tabu = rnd.randint(0, 3)
+            while candidate_tabu == tabu:
+                candidate_tabu = rnd.randint(0, 3)
+            state[index] = heurs, candidate_tabu
+
+    # mutate heuristics order without tabu
+    if rnd.random() < 0.12:
+        shuffle_start_index = rnd.randint(0, len(state) - 5)
+        to_shuffle = state[shuffle_start_index:shuffle_start_index + 5]
+        rnd.shuffle(to_shuffle)
+        to_shuffle = zip(to_shuffle, state[shuffle_start_index:shuffle_start_index + 5])
+        to_shuffle = list(map(lambda x: (x[0][0], x[1][1]), to_shuffle))
+        state[shuffle_start_index:shuffle_start_index + 5] = to_shuffle
+
+    return state
+
+
 def fitness_hyper_ksp(state, **kwargs):
     included = list(kwargs["included"])
     tabooed_items_generations = [0] * len(included)
@@ -52,7 +97,7 @@ def fitness_hyper_ksp(state, **kwargs):
 
 def minimize(dimension, **kwargs):
     return gene.minimize(dimension, initial_population_generator_hyper_ksp, crossover_reproduction_hyper_ksp,
-                         fitness_hyper_ksp, **kwargs)
+                         mutation_hyper_ksp, fitness_hyper_ksp, **kwargs)
 
 
 if __name__ == '__main__':

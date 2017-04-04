@@ -4,7 +4,7 @@ import random as rnd
 import numpy as np
 
 
-def crossover_selection(population, fitness_func, crossover_reproduction_func, **kwargs):
+def crossover_selection(population, crossover_reproduction_func, mutation_func, fitness_func, **kwargs):
     iteration = 0
     first_parent = None
     second_parent = None
@@ -31,19 +31,20 @@ def crossover_selection(population, fitness_func, crossover_reproduction_func, *
     if child is None:
         return
 
-    # TODO: mutate child
+    mutation_func(child, **kwargs)
+
     new_individual = {"heuristics": child, "fitness": fitness_func(child, **kwargs)}
     population.append(new_individual)
 
 
-def minimize(dimension, initial_population_generator, crossover_reproduction, fitness_func, **kwargs):
+def minimize(dimension, initial_population_generator, crossover_reproduction, mutation_func, fitness_func, **kwargs):
     # TODO how ti initialize population amount?
     population = initial_population_generator(500, dimension, **kwargs)
     max_fitness = 0
     iteration = 0
     # TODO finish condition?
     while iteration < 100:
-        crossover_selection(population, fitness_func, crossover_reproduction, **kwargs)
+        crossover_selection(population, crossover_reproduction, mutation_func, fitness_func, **kwargs)
         max_fitness_state_index = np.argmax([individual["fitness"] for individual in population])
         current_max_fitness = population[max_fitness_state_index]["fitness"]
         if max_fitness >= current_max_fitness:
