@@ -39,11 +39,11 @@ def crossover_selection(population, crossover_reproduction_func, mutation_func, 
 
 def minimize(dimension, initial_population_generator, crossover_reproduction, mutation_func, fitness_func, **kwargs):
     # TODO how ti initialize population amount?
-    population = initial_population_generator(500, dimension, **kwargs)
+    population = initial_population_generator(50, dimension, **kwargs)
     max_fitness = 0
     iteration = 0
     # TODO finish condition?
-    while iteration < 100:
+    while iteration < 10:
         crossover_selection(population, crossover_reproduction, mutation_func, fitness_func, **kwargs)
         max_fitness_state_index = np.argmax([individual["fitness"] for individual in population])
         current_max_fitness = population[max_fitness_state_index]["fitness"]

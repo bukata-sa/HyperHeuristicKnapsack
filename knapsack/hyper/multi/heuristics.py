@@ -8,27 +8,73 @@ from knapsack.hyper.single import heurs1knpsck as single
 def get_single_heurs_for_knapsack_with_least_cost():
     single_heuristics = single.get_all_single_heuristics()
     result = []
+    ksp_choice_functions = [least_weight_overall, most_weight_overall, least_cost_overall, most_cost_overall]
     for single_heuristic in single_heuristics:
-        def knapsack_with_least_cost_heuristic(current, tabooed_indexes, my_single_heuristic=single_heuristic,
-                                               **kwargs):
-            weights = np.asarray(kwargs["weights"])
-            indexed_weights = np.sum(np.asarray(current) * weights, axis=1)
-            indexed_weights = enumerate(indexed_weights)
-            indexed_weights = list(sorted(indexed_weights, key=operator.itemgetter(1)))
-            modified_index = -1
-            while modified_index == -1 and len(indexed_weights) > 0:
-                ksp_index = indexed_weights.pop()[0]
-                single_ksp_kwargs = {"costs": kwargs["costs"], "weights": kwargs["weights"][ksp_index],
-                                     "size": kwargs["sizes"][ksp_index]}
-                multi_include_constraint = build_multi_include_constraint(current, ksp_index)
-                tabooed_indexes = list(set(tabooed_indexes).union(set(multi_include_constraint)))
-                new_included, modified_index = my_single_heuristic(current[ksp_index], tabooed_indexes,
-                                                                   **single_ksp_kwargs)
-                current[ksp_index] = new_included
-            return current, modified_index
+        for ksp_choice_function in ksp_choice_functions:
+            def single_knapsack_with_exteme_property(current, tabooed_indexes,
+                                                     ksp_choice_function=ksp_choice_function,
+                                                     my_single_heuristic=single_heuristic, **kwargs):
+                current = list(current)
+                indexed_properties = ksp_choice_function(current, **kwargs)
+                modified_index = -1
+                while modified_index == -1 and len(indexed_properties) > 0:
+                    ksp_index = indexed_properties.pop()[0]
+                    single_ksp_kwargs = {"costs": kwargs["costs"], "weights": kwargs["weights"][ksp_index],
+                                         "size": kwargs["sizes"][ksp_index]}
+                    # TODO should multi include constraint be here?
+                    multi_include_constraint = build_multi_include_constraint(current, ksp_index)
+                    tabooed_indexes = list(set(tabooed_indexes).union(set(multi_include_constraint)))
+                    new_included, modified_index = my_single_heuristic(current[ksp_index], tabooed_indexes,
+                                                                       **single_ksp_kwargs)
+                    current[ksp_index] = new_included
+                return current, modified_index
 
-        result.append(knapsack_with_least_cost_heuristic)
+            result.append(single_knapsack_with_exteme_property)
     return result
+
+
+def least_weight_overall(included, **kwargs):
+    weights = np.asarray(kwargs["weights"])
+    indexed_properties = np.sum(np.asarray(included) * weights, axis=1)
+    indexed_properties = enumerate(indexed_properties)
+    indexed_properties = list(sorted(indexed_properties, key=operator.itemgetter(1), reverse=True))
+    return indexed_properties
+
+
+def most_weight_overall(included, **kwargs):
+    weights = np.asarray(kwargs["weights"])
+    indexed_properties = np.sum(np.asarray(included) * weights, axis=1)
+    indexed_properties = enumerate(indexed_properties)
+    indexed_properties = list(sorted(indexed_properties, key=operator.itemgetter(1)))
+    return indexed_properties
+
+
+def least_cost_overall(included, **kwargs):
+    costs = np.asarray(kwargs["costs"])
+    indexed_properties = np.sum(np.asarray(included) * costs, axis=1)
+    indexed_properties = enumerate(indexed_properties)
+    indexed_properties = list(sorted(indexed_properties, key=operator.itemgetter(1), reverse=True))
+    return indexed_properties
+
+
+def most_cost_overall(included, **kwargs):
+    costs = np.asarray(kwargs["costs"])
+    indexed_properties = np.sum(np.asarray(included) * costs, axis=1)
+    indexed_properties = enumerate(indexed_properties)
+    indexed_properties = list(sorted(indexed_properties, key=operator.itemgetter(1)))
+    return indexed_properties
+
+
+def most_efficiency_overall(included, **kwargs):
+    pass
+
+
+def least_efficiency_overall(included, **kwargs):
+    pass
+
+
+def potentially_most_cost(included, **kwargs):
+    pass
 
 
 def build_multi_include_constraint(current, ksp_index):
@@ -45,7 +91,7 @@ def build_multi_include_constraint(current, ksp_index):
 if __name__ == '__main__':
     heurs = get_single_heurs_for_knapsack_with_least_cost()
 
-    costs = [8, 12, 13, 64, 22, 41]
+    costs = [100, 600, 1200, 2400, 500, 2000]
     weights = [[8, 12, 13, 64, 22, 41],
                [8, 12, 13, 75, 22, 41],
                [3, 6, 4, 18, 6, 4],

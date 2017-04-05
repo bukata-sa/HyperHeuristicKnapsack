@@ -3,7 +3,7 @@ import numpy as np
 from knapsack.hyper.multi import genetic
 
 optimal_cost = 3800
-costs = [8, 12, 13, 64, 22, 41]
+costs = [100, 600, 1200, 2400, 500, 2000]
 weights = [[8, 12, 13, 64, 22, 41],
            [8, 12, 13, 75, 22, 41],
            [3, 6, 4, 18, 6, 4],
