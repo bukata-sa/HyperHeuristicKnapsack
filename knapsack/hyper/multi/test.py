@@ -1,20 +1,14 @@
 import numpy as np
 
 from knapsack.hyper.multi import genetic
+from knapsack.hyper.multi import problem
 
-optimal_cost = 3800
-costs = [100, 600, 1200, 2400, 500, 2000]
-weights = [[8, 12, 13, 64, 22, 41],
-           [8, 12, 13, 75, 22, 41],
-           [3, 6, 4, 18, 6, 4],
-           [5, 10, 8, 32, 6, 12],
-           [5, 13, 8, 42, 6, 20],
-           [5, 13, 8, 48, 6, 20],
-           [0, 0, 0, 0, 8, 0],
-           [3, 0, 4, 0, 8, 0],
-           [3, 2, 4, 0, 8, 4],
-           [3, 2, 4, 8, 8, 4]]
-sizes = [80, 96, 20, 36, 44, 48, 10, 18, 22, 24]
+optimal_selection = [[1, 0, 0, 1, 0, 0, 0, 0, 0, 0], [0, 1, 1, 0, 0, 0, 1, 0, 0, 0]]
+costs = [92, 57, 49, 68, 60, 43, 67, 84, 87, 72]
+weights = [[23, 31, 29, 44, 53, 38, 63, 85, 89, 82],
+           [23, 31, 29, 44, 53, 38, 63, 85, 89, 82]]
+sizes = [70, 127]
+optimal_cost = problem.solve(optimal_selection, costs, weights, sizes)
 start = np.zeros((len(sizes), len(costs)))
 
 if __name__ == '__main__':
@@ -23,8 +17,8 @@ if __name__ == '__main__':
     for i in range(1, 50):
         optimal_funcs = genetic.minimize(50, weights=weights, costs=costs, sizes=sizes, included=start)
         current = genetic.fitness_hyper_ksp(optimal_funcs, weights=weights, costs=costs, sizes=sizes, included=start)
-        print("Current:\t" + str(3800 - current))
-        result += 13549094 - current
+        print("Current:\t" + str(optimal_cost - current))
+        result += optimal_cost - current
         current_gap = 100 * (optimal_cost - current) / optimal_cost
         print("Normalized:\t" + str(current_gap))
         cumulative_gap += current_gap

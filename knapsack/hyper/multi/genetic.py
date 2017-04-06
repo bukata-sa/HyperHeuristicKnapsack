@@ -9,7 +9,7 @@ from knapsack.hyper.single.genetic import simple_state_generator_hyper_ksp
 def fitness_hyper_ksp(state, **kwargs):
     # TODO: avoid copypaste
     included = list(kwargs["included"])
-    tabooed_items_generations = [0] * len(included)
+    tabooed_items_generations = [0] * len(kwargs["costs"])
     for operation, tabu_generation in state:
         tabooed_items = [index for index, generation in enumerate(tabooed_items_generations) if generation > 0]
         included, modified_index = operation(included, tabooed_indexes=tabooed_items, costs=kwargs["costs"],

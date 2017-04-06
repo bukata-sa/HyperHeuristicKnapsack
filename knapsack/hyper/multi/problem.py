@@ -23,9 +23,9 @@ def validate(included, costs, weights, sizes):
     if not (weights.shape[1] == costs.size == included.shape[1]):
         return False
 
-    # vertical_sum_included = np.sum(included, axis=0)
-    # if np.where(vertical_sum_included > 1)[0].size > 0:
-    #     return False
+    vertical_sum_included = np.sum(included, axis=0)
+    if np.where(vertical_sum_included > 1)[0].size > 0:
+        return False
 
     sum_included_weights = np.sum(weights * included, axis=1)
     if np.where(sum_included_weights > sizes)[0].size > 0:
