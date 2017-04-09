@@ -8,13 +8,17 @@ def ksp_solve_lp_relaxed(costs, weights, sizes):
     x = Variable(len(sizes), len(costs))
     weights_param = Parameter(rows=len(sizes), cols=len(costs))
     weights_param.value = np.asarray(weights)
+    costs_param = Parameter(len(costs))
+    costs_param.value = costs
 
-    constr1 = [diag(x * weights_param.T) < sizes]
-    constr2 = [sum_entries(x, axis=0).T <= [1] * len(costs)]
-    constr3 = [0 <= x, x <= 1]
-    objective = Maximize(sum_entries(np.dot(optimal_selection, costs)))
+    constr = [diag(x * weights_param.T) < sizes, sum_entries(x, axis=0).T <= [1] * len(costs), 0 <= x, x <= 1]
+    objective = Maximize(sum_entries(x * costs_param))
 
-    return Problem(objective, constr1 + constr2 + constr3).solve()
+    solution = Problem(objective, constr).solve()
+    print(x.value)
+    print(problem.validate(x.value, costs, weights, sizes))
+    print(problem.solve(x.value, costs, weights, sizes))
+    return solution
 
 
 if __name__ == '__main__':

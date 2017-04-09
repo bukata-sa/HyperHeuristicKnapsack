@@ -1,14 +1,15 @@
 import numpy as np
 
 from knapsack.hyper.multi import genetic
-from knapsack.hyper.multi import problem
+from knapsack.hyper.multi import lp_relaxed as lp
 
 optimal_selection = [[1, 0, 0, 1, 0, 0, 0, 0, 0, 0], [0, 1, 1, 0, 0, 0, 1, 0, 0, 0]]
 costs = [92, 57, 49, 68, 60, 43, 67, 84, 87, 72]
 weights = [[23, 31, 29, 44, 53, 38, 63, 85, 89, 82],
            [23, 31, 29, 44, 53, 38, 63, 85, 89, 82]]
 sizes = [70, 127]
-optimal_cost = problem.solve(optimal_selection, costs, weights, sizes)
+# optimal_cost = problem.solve(optimal_selection, costs, weights, sizes)
+optimal_cost = lp.ksp_solve_lp_relaxed(costs, weights, sizes)
 start = np.zeros((len(sizes), len(costs)))
 
 if __name__ == '__main__':
