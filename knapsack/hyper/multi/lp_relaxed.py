@@ -28,39 +28,31 @@ def ksp_solve_lp_relaxed_greedy(costs, weights, sizes):
     weights = np.asarray(weights)
     sizes = np.asarray(sizes)
 
-    included = []
+    included = np.zeros((len(sizes), len(costs)))
+    stop_index = 0
     for ksp_index, weight in enumerate(weights):
-        current_characteristics = list(sorted(enumerate(costs / weight), key=operator.itemgetter(1), reverse=True))
-        median_index = 0
-        while np.sum(weight[:median_index + 1]) < sizes[ksp_index]:
+        current_characteristics = filter(lambda x: np.sum(included, axis=0)[x[0]] < 1, enumerate(costs / weight))
+        current_characteristics = list(sorted(current_characteristics, key=operator.itemgetter(1), reverse=True))
+        median_index = stop_index
+        while np.sum(weight[stop_index:median_index + 1]) < sizes[ksp_index]:
             median_index += 1
-        median = current_characteristics[median_index]
+        median = current_characteristics[median_index - stop_index]
         current_included = [0] * len(costs)
-        rest = (sizes[ksp_index] - np.sum(weight[costs / weight > median[1]])) / weight[median_index]
+        rest = (sizes[ksp_index] - np.sum(weight[stop_index:median_index])) / weight[median_index]
         for item_index, characteristic in current_characteristics:
             if characteristic > median[1]:
-                current_included[item_index] = 1
+                if np.sum(included, axis=0)[item_index] > 0:
+                    current_included[item_index] = 1 - np.sum(included, axis=0)[item_index]
+                else:
+                    current_included[item_index] = 1
             elif characteristic == median[1]:
                 current_included[item_index] = rest
             else:
                 current_included[item_index] = 0
-        included.append(current_included)
-
-    included = np.asarray(included)
-    for item_index in range(len(costs)):
-        if np.sum(included, axis=0)[item_index] <= 1:
-            continue
-        vertical_characteristics = list(sorted(enumerate(costs[item_index] / weights[:, item_index]),
-                                               key=operator.itemgetter(1)))
-        new_included = [0]*len(sizes)
-        while True:
-            ksp_index, _ = vertical_characteristics.pop()
-            if np.sum(new_included) + included[ksp_index][item_index] <= 1:
-                new_included[ksp_index] =+ included[ksp_index][item_index]
-            else:
-                break
-        included[:, item_index] = new_included
+        stop_index = median_index
+        included[ksp_index] = current_included
     return problem.solve(included, costs, weights, sizes)
+
 
 if __name__ == '__main__':
     optimal_selection = [[1, 0, 0, 1, 0, 0, 0, 0, 0, 0], [0, 1, 1, 0, 0, 0, 1, 0, 0, 0]]
