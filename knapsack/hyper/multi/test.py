@@ -9,7 +9,7 @@ weights = [[23, 31, 29, 44, 53, 38, 63, 85, 89, 82],
            [23, 31, 29, 44, 53, 38, 63, 85, 89, 82]]
 sizes = [70, 127]
 # optimal_cost = problem.solve(optimal_selection, costs, weights, sizes)
-optimal_cost = lp.ksp_solve_lp_relaxed_convex(costs, weights, sizes)
+optimal_cost = lp.ksp_solve_lp_relaxed_greedy(costs, weights, sizes)
 # TODO generate initial state using LP-relaxed solution
 start = np.zeros((len(sizes), len(costs)))
 

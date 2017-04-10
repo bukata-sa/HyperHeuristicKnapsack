@@ -17,9 +17,6 @@ def ksp_solve_lp_relaxed_convex(costs, weights, sizes):
     objective = Maximize(sum_entries(x * costs_param))
 
     solution = Problem(objective, constr).solve()
-    print(x.value)
-    print(problem.validate(x.value, costs, weights, sizes))
-    print(problem.solve(x.value, costs, weights, sizes))
     return solution
 
 
