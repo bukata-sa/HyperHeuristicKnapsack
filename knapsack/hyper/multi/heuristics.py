@@ -9,7 +9,8 @@ def get_single_heurs_for_knapsack_with_least_cost():
     single_heuristics = single.get_all_single_heuristics()
     result = []
     ksp_choice_functions = [least_weight_overall, most_weight_overall, least_cost_overall, most_cost_overall,
-                            most_efficiency_overall, least_efficiency_overall, most_capacity, least_capacity]
+                            most_efficiency_overall, least_efficiency_overall, most_capacity, least_capacity,
+                            most_efficiency_potentially, least_efficiency_potentially]
     for single_heuristic in single_heuristics:
         for ksp_choice_function in ksp_choice_functions:
             def single_knapsack_with_exteme_property(current, tabooed_indexes,
@@ -102,6 +103,26 @@ def least_capacity(included, **kwargs):
     weights = np.asarray(kwargs["weights"])
     sizes = np.asarray(kwargs["sizes"])
     indexed_properties = [weight / size for weight, size in zip(weights, sizes)]
+    indexed_properties = np.sum(indexed_properties, axis=1)
+    indexed_properties = enumerate(indexed_properties)
+    indexed_properties = list(sorted(indexed_properties, key=operator.itemgetter(1), reverse=True))
+    return indexed_properties
+
+
+def most_efficiency_potentially(included, **kwargs):
+    costs = np.asarray(kwargs["costs"])
+    weights = np.asarray(kwargs["weights"])
+    indexed_properties = np.asarray([costs / weight for weight in weights])
+    indexed_properties = np.sum(indexed_properties, axis=1)
+    indexed_properties = enumerate(indexed_properties)
+    indexed_properties = list(sorted(indexed_properties, key=operator.itemgetter(1)))
+    return indexed_properties
+
+
+def least_efficiency_potentially(included, **kwargs):
+    costs = np.asarray(kwargs["costs"])
+    weights = np.asarray(kwargs["weights"])
+    indexed_properties = np.asarray([costs / weight for weight in weights])
     indexed_properties = np.sum(indexed_properties, axis=1)
     indexed_properties = enumerate(indexed_properties)
     indexed_properties = list(sorted(indexed_properties, key=operator.itemgetter(1), reverse=True))
