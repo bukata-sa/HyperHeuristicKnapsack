@@ -1,8 +1,26 @@
 import random as rnd
 
-import numpy as np
+import algorithms as algs
+import knapsack.hyper.single.problem as ksp
 
-from knapsack.problem import solve, validate
+
+def simple_state_generator_ksp(dimension):
+    state = []
+    for i in range(0, dimension):
+        random_boolean = False if rnd.randint(0, 1) == 0 else True
+        state.append(random_boolean)
+    return state
+
+
+def initial_population_generator_ksp(amount, dimension, validator=ksp.validate,
+                                     state_generator=simple_state_generator_ksp,
+                                     **kwargs):
+    population = []
+    while len(population) < amount:
+        population_candidate = state_generator(dimension)
+        if validator(population_candidate, **kwargs):
+            population.append(population_candidate)
+    return population
 
 
 def compare_state_ksp(state1, state2):
@@ -12,79 +30,17 @@ def compare_state_ksp(state1, state2):
     return False
 
 
-def crossover_selection_ksp(population, fitness_func,
-                            validate_func=validate,
-                            compare_state=compare_state_ksp,
-                            **kwargs):
+def crossover_func_ksp(first_parent, second_parent, **kwargs):
     iteration = 0
-    while iteration < 100:
-        iteration += 1
-        first_parent_index = rnd.randint(0, len(population) - 1)
-        second_parent_index = rnd.randint(0, len(population) - 1)
-        first_parent = population[first_parent_index]
-        second_parent = population[second_parent_index]
-        if (first_parent_index != second_parent_index and
-                not compare_state(first_parent, second_parent) or iteration > len(population) ** 2):
-            break
-    valid_child = False
-
-    iteration = 0
-    while not (valid_child or iteration > len(first_parent) ** 2):
+    while iteration < len(first_parent) ** 2:
         # TODO: try other genetic operators (different types of crossover, for example)
         # nor first allel nor last allel
-        crossover_index = rnd.randint(1, len(first_parent) - 2)
+        crossover_index = rnd.randint(1, len(first_parent) - 1)
         child_candidate = first_parent[:crossover_index + 1] + second_parent[crossover_index + 1:]
-        valid_child = validate_func(child_candidate, **kwargs)
-
-    # TODO: mutate child
-
-    if not valid_child:
-        return
-
-    for i, state in enumerate(population):
-        if fitness_func(child_candidate, **kwargs) > fitness_func(state, **kwargs):
-            # TODO: avoid dominant genome
-            population[i] = child_candidate
-            break
+        if ksp.validate(child_candidate, **kwargs):
+            return child_candidate
+    return None
 
 
-def simple_state_generator_ksp(dim):
-    state = []
-    for i in range(0, dim):
-        random_boolean = False if rnd.randint(0, 1) == 0 else True
-        state.append(random_boolean)
-    return state
-
-
-def initial_population_generator_ksp(amount, dim, validator=validate,
-                                     state_generator=simple_state_generator_ksp,
-                                     **kwargs):
-    population = []
-    while len(population) < amount:
-        population_candidate = state_generator(dim)
-        if validator(population_candidate, kwargs["costs"], kwargs["weights"], kwargs["size"]):
-            population.append(population_candidate)
-    return population
-
-
-def minimize(dimension,
-             initial_population_generator=initial_population_generator_ksp,
-             fitness_func=solve,
-             selection_func=crossover_selection_ksp,
-             **kwargs):
-    population = initial_population_generator(30, dimension, **kwargs)
-    max_fitness = 0
-    iteration = 0
-    while iteration < 100:
-        selection_func(population, fitness_func, **kwargs)
-        max_fitness_state_index = np.argmax([fitness_func(state, **kwargs) for state in population])
-        current_max_fitness = fitness_func(population[max_fitness_state_index], **kwargs)
-        if max_fitness >= current_max_fitness:
-            iteration += 1
-        else:
-            max_fitness = current_max_fitness
-            iteration = 0
-    return population[max_fitness_state_index]
-
-
-print(minimize(5, costs=[1, 2, 3, 4, 5], weights=[5, 5, 5, 5, 5], size=10))
+def minimize(dimension, **kwargs):
+    return algs.genetic.minimize(dimension, initial_population_generator_ksp, crossover_func_ksp, ksp.solve, **kwargs)
