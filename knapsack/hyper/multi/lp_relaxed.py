@@ -26,28 +26,22 @@ def ksp_solve_lp_relaxed_greedy(costs, weights, sizes):
     sizes = np.asarray(sizes)
 
     included = np.zeros((len(sizes), len(costs)))
-    stop_index = 0
     for ksp_index, weight in enumerate(weights):
         current_characteristics = filter(lambda x: np.sum(included, axis=0)[x[0]] < 1, enumerate(costs / weight))
-        current_characteristics = list(sorted(current_characteristics, key=operator.itemgetter(1), reverse=True))
-        median_index = stop_index
-        while np.sum(weight[stop_index:median_index + 1]) < sizes[ksp_index]:
-            median_index += 1
-        median = current_characteristics[median_index - stop_index]
-        current_included = [0] * len(costs)
-        rest = (sizes[ksp_index] - np.sum(weight[stop_index:median_index])) / weight[median_index]
-        for item_index, characteristic in current_characteristics:
-            if characteristic > median[1]:
-                if np.sum(included, axis=0)[item_index] > 0:
-                    current_included[item_index] = 1 - np.sum(included, axis=0)[item_index]
-                else:
-                    current_included[item_index] = 1
-            elif characteristic == median[1]:
-                current_included[item_index] = rest
-            else:
-                current_included[item_index] = 0
-        stop_index = median_index
-        included[ksp_index] = current_included
+        current_characteristics = list(sorted(current_characteristics, key=operator.itemgetter(1)))
+        top_median = []
+        top_items_characteristics_indexes = list(map(operator.itemgetter(0), current_characteristics))
+        while len(top_items_characteristics_indexes) > 0 and \
+                        np.sum(weight[top_median + [top_items_characteristics_indexes[len(top_items_characteristics_indexes) - 1]]]) < sizes[ksp_index]:
+            top_median.append(top_items_characteristics_indexes.pop())
+        if len(top_items_characteristics_indexes) == 0:
+            included[ksp_index][top_median] = np.ones((1, len(top_median))) - np.sum(included, axis=0)[top_median]
+            break
+
+        median_index = top_items_characteristics_indexes.pop()
+        rest = (sizes[ksp_index] - np.sum(weight[top_median])) / weight[median_index]
+        included[ksp_index][top_median] = np.ones((1, len(top_median))) - np.sum(included, axis=0)[top_median]
+        included[ksp_index][median_index] = min(1 - np.sum(included, axis=0)[median_index], rest)
     return problem.solve(included, costs, weights, sizes)
 
 

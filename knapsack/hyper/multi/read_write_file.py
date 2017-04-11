@@ -56,8 +56,7 @@ def parse_mknap2(path_to_file):
             results.append({
                 'costs': costs,
                 'weights': weights,
-                'sizes': sizes,
-                'optimal': optimal
+                'sizes': sizes
             })
     return results
 

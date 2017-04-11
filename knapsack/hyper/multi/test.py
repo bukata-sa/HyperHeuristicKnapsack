@@ -2,26 +2,39 @@ import numpy as np
 
 from knapsack.hyper.multi import genetic
 from knapsack.hyper.multi import lp_relaxed as lp
+from knapsack.hyper.multi import read_write_file as io
 
-optimal_selection = [[1, 0, 0, 1, 0, 0, 0, 0, 0, 0], [0, 1, 1, 0, 0, 0, 1, 0, 0, 0]]
-costs = [92, 57, 49, 68, 60, 43, 67, 84, 87, 72]
-weights = [[23, 31, 29, 44, 53, 38, 63, 85, 89, 82],
-           [23, 31, 29, 44, 53, 38, 63, 85, 89, 82]]
-sizes = [70, 127]
-# optimal_cost = problem.solve(optimal_selection, costs, weights, sizes)
-optimal_cost = lp.ksp_solve_lp_relaxed_greedy(costs, weights, sizes)
-# TODO generate initial state using LP-relaxed solution
-start = np.zeros((len(sizes), len(costs)))
+mknap1_path, mknap2_path = "./resources/mknap1.txt", "./resources/mknap2.txt"
+mknapcbs_pathes = ["./resources/mknapcb1.txt", "./resources/mknapcb2.txt", "./resources/mknapcb3.txt", "./resources/mknapcb4.txt",
+                   "./resources/mknapcb5.txt", "./resources/mknapcb6.txt", "./resources/mknapcb7.txt", "./resources/mknapcb8.txt",
+                   "./resources/mknapcb9.txt"]
 
-if __name__ == '__main__':
+
+def solve(knapsack, optimal, attempts=50):
     result = 0
     cumulative_gap = 0
-    for i in range(1, 50):
-        optimal_funcs = genetic.minimize(50, weights=weights, costs=costs, sizes=sizes, included=start)
-        current = genetic.fitness_hyper_ksp(optimal_funcs, weights=weights, costs=costs, sizes=sizes, included=start)
-        print("Current:\t" + str(optimal_cost - current))
-        result += optimal_cost - current
-        current_gap = 100 * (optimal_cost - current) / optimal_cost
+    print("Pseudo-optimal:\t" + str(optimal))
+    # TODO generate initial state using LP-relaxed solution
+    start = np.zeros((len(knapsack["sizes"]), len(knapsack["costs"])))
+    for i in range(1, attempts + 1):
+        optimal_funcs = genetic.minimize(50, weights=knapsack["weights"], costs=knapsack["costs"], sizes=knapsack["sizes"], included=start)
+        current = genetic.fitness_hyper_ksp(optimal_funcs, weights=knapsack["weights"], costs=knapsack["costs"], sizes=knapsack["sizes"], included=start)
+        print("Current:\t" + str(optimal - current))
+        result += optimal - current
+        current_gap = 100 * (optimal - current) / optimal
         print("Normalized:\t" + str(current_gap))
         cumulative_gap += current_gap
         print("Normed cum:\t" + str(cumulative_gap / i))
+    return cumulative_gap / attempts
+
+
+if __name__ == '__main__':
+    knapsacks = io.parse_mknap2(mknap2_path)
+    lp_optimal = [lp.ksp_solve_lp_relaxed_greedy(**knapsack) for knapsack in knapsacks]
+    optimals = []
+    for knapsack, lp_optimal in zip(knapsacks, lp_optimal):
+        print("KNAPSACK:")
+        print("Number of KSPs: " + str(len(knapsack["sizes"])))
+        print("Number of Items: " + str(len(knapsack["costs"])))
+        optimals.append(solve(knapsack, lp_optimal))
+    print("CUMULATIVE GAP OVER ALL TEST DATA: " + str(optimals))
