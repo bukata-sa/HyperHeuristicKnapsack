@@ -4,8 +4,14 @@ import numpy as np
 
 from knapsack.hyper.single import heurs1knpsck as single
 
+cached_heuristics = None
 
-def get_single_heurs_for_knapsack_with_least_cost():
+
+def get_single_heurs_for_multi_knapsack():
+    global cached_heuristics
+    if cached_heuristics is not None:
+        return cached_heuristics
+
     single_heuristics = single.get_all_single_heuristics()
     result = []
     ksp_choice_functions = [least_weight_overall, most_weight_overall, least_cost_overall, most_cost_overall,
@@ -32,6 +38,7 @@ def get_single_heurs_for_knapsack_with_least_cost():
                 return current, modified_index
 
             result.append(single_knapsack_with_exteme_property)
+    cached_heuristics = result
     return result
 
 
@@ -141,7 +148,7 @@ def build_multi_include_constraint(current, ksp_index):
 
 
 if __name__ == '__main__':
-    heurs = get_single_heurs_for_knapsack_with_least_cost()
+    heurs = get_single_heurs_for_multi_knapsack()
 
     costs = [100, 600, 1200, 2400, 500, 2000]
     weights = [[8, 12, 13, 64, 22, 41],

@@ -4,8 +4,7 @@ from knapsack.hyper.single.problem import *
 
 
 def get_all_single_heuristics():
-    return [add_lightest, add_heaviest, add_least_cost, add_most_cost, add_best, remove_lightest, remove_heaviest,
-            remove_least_cost, remove_most_cost, remove_worst]
+    return [add_lightest, add_heaviest, add_least_cost, add_most_cost, add_best]
 
 
 def update_ksp_extreme_property(current, is_add, is_max, properties, tabooed_indexes=None, **kwargs):

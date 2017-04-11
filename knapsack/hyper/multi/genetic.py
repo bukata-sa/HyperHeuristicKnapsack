@@ -1,7 +1,7 @@
 import random as rnd
 
 from algorithms import genetic as gene
-from knapsack.hyper.multi import heuristics as heurs
+from knapsack.hyper.multi import heuristics
 from knapsack.hyper.multi import problem
 from knapsack.hyper.single.genetic import simple_state_generator_hyper_ksp
 
@@ -32,7 +32,7 @@ def crossover_reproduction_hyper_ksp(first_parent, second_parent, **kwargs):
 
 def initial_population_generator_hyper_ksp(amount, dimension, **kwargs):
     population = []
-    heuristics_candidates = heurs.get_single_heurs_for_knapsack_with_least_cost()
+    heuristics_candidates = heuristics.get_single_heurs_for_multi_knapsack()
     for i in range(amount):
         state = simple_state_generator_hyper_ksp(dimension, heuristics_candidates)
         population.append({"heuristics": state, "fitness": fitness_hyper_ksp(state, **kwargs)})
@@ -40,7 +40,44 @@ def initial_population_generator_hyper_ksp(amount, dimension, **kwargs):
 
 
 def mutation_hyper_ksp(state, **kwargs):
-    # TODO implement
+    # mutate heuristics order with tabu (reorder tuples)
+    if rnd.random() < 0.12:
+        shuffle_start_index = rnd.randint(0, len(state) - 5)
+        to_shuffle = state[shuffle_start_index:shuffle_start_index + 5]
+        rnd.shuffle(to_shuffle)
+        state[shuffle_start_index:shuffle_start_index + 5] = to_shuffle
+
+    # mutate heuristics (replace with random)
+    if rnd.random() < 0.12:
+        heurs_indexes_to_update = rnd.sample(range(len(state)), 5)
+        while len(heurs_indexes_to_update) > 0:
+            index = heurs_indexes_to_update.pop()
+            heurs, tabu = state[index]
+            candidate_heurs = rnd.choice(heuristics.get_single_heurs_for_multi_knapsack())
+            while candidate_heurs == heurs:
+                candidate_heurs = rnd.choice(heuristics.get_single_heurs_for_multi_knapsack())
+            state[index] = candidate_heurs, tabu
+
+    # mutate tabu indexes
+    if rnd.random() < 0.12:
+        tabu_indexes_to_update = rnd.sample(range(len(state)), 5)
+        while len(tabu_indexes_to_update) > 0:
+            index = tabu_indexes_to_update.pop()
+            heurs, tabu = state[index]
+            candidate_tabu = rnd.randint(0, 3)
+            while candidate_tabu == tabu:
+                candidate_tabu = rnd.randint(0, 3)
+            state[index] = heurs, candidate_tabu
+
+    # mutate heuristics order without tabu
+    if rnd.random() < 0.12:
+        shuffle_start_index = rnd.randint(0, len(state) - 5)
+        to_shuffle = state[shuffle_start_index:shuffle_start_index + 5]
+        rnd.shuffle(to_shuffle)
+        to_shuffle = zip(to_shuffle, state[shuffle_start_index:shuffle_start_index + 5])
+        to_shuffle = list(map(lambda x: (x[0][0], x[1][1]), to_shuffle))
+        state[shuffle_start_index:shuffle_start_index + 5] = to_shuffle
+
     return state
 
 
