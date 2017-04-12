@@ -7,7 +7,7 @@ from knapsack.hyper.single import heurs1knpsck as single
 cached_heuristics = None
 
 
-def get_single_heurs_for_multi_knapsack():
+def get_heuristics():
     global cached_heuristics
     if cached_heuristics is not None:
         return cached_heuristics
@@ -155,7 +155,7 @@ def build_multi_include_constraint(current, ksp_index):
 
 
 if __name__ == '__main__':
-    heurs = get_single_heurs_for_multi_knapsack()
+    heurs = get_heuristics()
 
     costs = [100, 600, 1200, 2400, 500, 2000]
     weights = [[8, 12, 13, 64, 22, 41],

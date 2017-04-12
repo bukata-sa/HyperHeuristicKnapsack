@@ -38,9 +38,13 @@ def crossover_reproduction_hyper_ksp(first_parent, second_parent, **kwargs):
     return child_candidate
 
 
+def mutation_hyper_single_ksp(state, **kwargs):
+    return mutation_hyper_ksp(state, heurs, **kwargs)
+
+
 # probability 0.6 that state won't be changed
 # probability 0.4 that at least one mutation will be applied
-def mutation_hyper_ksp(state, **kwargs):
+def mutation_hyper_ksp(state, heuristic_source, **kwargs):
     # mutate heuristics order with tabu (reorder tuples)
     if rnd.random() < 0.12:
         shuffle_start_index = rnd.randint(0, len(state) - 5)
@@ -54,9 +58,9 @@ def mutation_hyper_ksp(state, **kwargs):
         while len(heurs_indexes_to_update) > 0:
             index = heurs_indexes_to_update.pop()
             heurs, tabu = state[index]
-            candidate_heurs = rnd.choice(heuristics_candidates)
+            candidate_heurs = rnd.choice(heuristic_source.get_heuristics())[0]
             while candidate_heurs == heurs:
-                candidate_heurs = rnd.choice(heuristics_candidates)
+                candidate_heurs = rnd.choice(heuristic_source.get_heuristics())[0]
             state[index] = candidate_heurs, tabu
 
     # mutate tabu indexes
@@ -99,7 +103,7 @@ def fitness_hyper_ksp(state, **kwargs):
 
 def minimize(dimension, **kwargs):
     return gene.minimize(dimension, initial_population_generator_hyper_ksp, crossover_reproduction_hyper_ksp,
-                         mutation_hyper_ksp, fitness_hyper_ksp, **kwargs)
+                         mutation_hyper_single_ksp, fitness_hyper_ksp, **kwargs)
 
 
 if __name__ == '__main__':
