@@ -2,9 +2,21 @@ import operator
 
 from knapsack.hyper.single.problem import *
 
+cached_heuristics = None
+
 
 def get_all_single_heuristics():
-    return [add_lightest, add_heaviest, add_least_cost, add_most_cost, add_best]
+    global cached_heuristics
+    if cached_heuristics is not None:
+        return cached_heuristics
+    # probability to select add heuristic is 0.9
+    add_heurs = [add_lightest, add_heaviest, add_least_cost, add_most_cost, add_best]
+    add_heurs = list(zip(add_heurs, [0.9 / len(add_heurs)] * len(add_heurs)))
+    # probability to select remove heuristic is 0.1
+    remove_heurs = [remove_lightest, remove_heaviest, remove_least_cost, remove_most_cost, remove_worst]
+    remove_heurs = list(zip(remove_heurs, [0.1 / len(remove_heurs)] * len(remove_heurs)))
+    cached_heuristics = add_heurs + remove_heurs
+    return cached_heuristics
 
 
 def update_ksp_extreme_property(current, is_add, is_max, properties, tabooed_indexes=None, **kwargs):

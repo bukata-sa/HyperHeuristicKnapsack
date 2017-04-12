@@ -8,10 +8,15 @@ import knapsack.hyper.single.problem as problem
 def simple_state_generator_hyper_ksp(dimension, heuristics_candidates):
     state = []
     while len(state) < dimension:
-        index = rnd.randint(0, len(heuristics_candidates) - 1)
         probability = rnd.random()
         tabu_generation = rnd.randint(3, 6) if probability < 0.35 else 0
-        state.append((heuristics_candidates[index], tabu_generation))
+        probability = rnd.random()
+        cumulative_probability = 0
+        for index, heuristics_candidate in enumerate(heuristics_candidates):
+            cumulative_probability += heuristics_candidate[1]
+            if probability <= cumulative_probability:
+                break
+        state.append((heuristics_candidates[index][0], tabu_generation))
     return state
 
 

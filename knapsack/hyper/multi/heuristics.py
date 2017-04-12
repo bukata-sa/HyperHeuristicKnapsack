@@ -21,7 +21,7 @@ def get_single_heurs_for_multi_knapsack():
         for ksp_choice_function in ksp_choice_functions:
             def single_knapsack_with_exteme_property(current, tabooed_indexes,
                                                      ksp_choice_function=ksp_choice_function,
-                                                     my_single_heuristic=single_heuristic, **kwargs):
+                                                     my_single_heuristic=single_heuristic[0], **kwargs):
                 current = list(current)
                 indexed_properties = ksp_choice_function(current, **kwargs)
                 modified_index = -1
@@ -37,8 +37,15 @@ def get_single_heurs_for_multi_knapsack():
                     current[ksp_index] = new_included
                 return current, modified_index
 
-            result.append(single_knapsack_with_exteme_property)
+            result.append((single_knapsack_with_exteme_property, single_heuristic[1]))
+    result = normalize_probabilities(result)
     cached_heuristics = result
+    return result
+
+
+def normalize_probabilities(result):
+    sum_probabilities = np.sum([item[1] for item in result])
+    result = list(map(lambda x: (x[0], x[1] / sum_probabilities), result))
     return result
 
 
