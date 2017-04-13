@@ -32,7 +32,9 @@ def ksp_solve_lp_relaxed_greedy(costs, weights, sizes):
         top_median = []
         top_items_characteristics_indexes = list(map(operator.itemgetter(0), current_characteristics))
         while len(top_items_characteristics_indexes) > 0 and \
-                        np.sum(weight[top_median + [top_items_characteristics_indexes[len(top_items_characteristics_indexes) - 1]]]) < sizes[ksp_index]:
+                        np.sum(weight[top_median + [
+                            top_items_characteristics_indexes[len(top_items_characteristics_indexes) - 1]]]) < sizes[
+                    ksp_index]:
             top_median.append(top_items_characteristics_indexes.pop())
         if len(top_items_characteristics_indexes) == 0:
             included[ksp_index][top_median] = np.ones((1, len(top_median))) - np.sum(included, axis=0)[top_median]
@@ -42,7 +44,7 @@ def ksp_solve_lp_relaxed_greedy(costs, weights, sizes):
         rest = (sizes[ksp_index] - np.sum(weight[top_median])) / weight[median_index]
         included[ksp_index][top_median] = np.ones((1, len(top_median))) - np.sum(included, axis=0)[top_median]
         included[ksp_index][median_index] = min(1 - np.sum(included, axis=0)[median_index], rest)
-    return problem.solve(included, costs, weights, sizes)
+    return problem.solve(included, costs, weights, sizes), included
 
 
 if __name__ == '__main__':
