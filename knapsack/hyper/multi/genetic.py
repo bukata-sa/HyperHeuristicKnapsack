@@ -1,5 +1,7 @@
 import random as rnd
 
+from pathos.multiprocessing import ProcessPool as Pool
+
 from algorithms import genetic as gene
 from knapsack.hyper.multi import heuristics
 from knapsack.hyper.multi import problem
@@ -39,10 +41,23 @@ def initial_population_generator_hyper_ksp(amount, dimension, **kwargs):
     return population
 
 
+def initial_population_generator_hyper_ksp_multiproc(amount, dimension, **kwargs):
+    heuristics_candidates = heuristics.get_heuristics()
+
+    def worker(_):
+        state = simple_state_generator_hyper_ksp(dimension, heuristics_candidates)
+        result = {"heuristics": state, "fitness": fitness_hyper_ksp(state, **kwargs)}
+        return result
+
+    pool = Pool()
+    population = pool.map(worker, range(amount))
+    return population
+
+
 def mutation_hyper_multi_ksp(state, **kwargs):
     return mutation_hyper_ksp(state, heuristics)
 
 
 def minimize(dimension, **kwargs):
-    return gene.minimize(dimension, initial_population_generator_hyper_ksp, crossover_reproduction_hyper_ksp,
+    return gene.minimize(dimension, initial_population_generator_hyper_ksp_multiproc, crossover_reproduction_hyper_ksp,
                          mutation_hyper_multi_ksp, fitness_hyper_ksp, **kwargs)

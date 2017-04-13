@@ -23,7 +23,6 @@ def generate_initial_knapsack(pseudo_optimal, weights, costs, sizes):
             pseudo_optimal_value = pseudo_optimal[ksp_index][item_index]
             initial_knapsack[ksp_index][item_index] = random.randint(0, 1) if pseudo_optimal_value == 1 else 0
     initial_fitness = problem.solve(initial_knapsack, costs, weights, sizes)
-    print(initial_fitness)
     return initial_knapsack
 
 
