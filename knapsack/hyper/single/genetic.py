@@ -9,7 +9,7 @@ def simple_state_generator_hyper_ksp(dimension, heuristics_candidates):
     state = []
     while len(state) < dimension:
         probability = rnd.random()
-        tabu_generation = rnd.randint(3, 6) if probability < 0.35 else 0
+        tabu_generation = rnd.randint(3, 6) if probability < 0.1 else 0
         probability = rnd.random()
         cumulative_probability = 0
         for index, heuristics_candidate in enumerate(heuristics_candidates):
