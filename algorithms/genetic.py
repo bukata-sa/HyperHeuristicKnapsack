@@ -1,5 +1,6 @@
 import operator
 import random as rnd
+import time
 
 import numpy as np
 
@@ -40,12 +41,14 @@ def crossover_selection(population, part_of_best_to_stay_alive, crossover_reprod
 
 def minimize(dimension, initial_population_generator, crossover_reproduction, mutation_func, fitness_func, **kwargs):
     # TODO how ti initialize population amount?
-    population = initial_population_generator(10, dimension, **kwargs)
-    part_of_best_to_stay_alive = int(len(population) * 0.25)
+    first = time.perf_counter()
+    population = initial_population_generator(500, dimension, **kwargs)
+    print(time.perf_counter() - first)
+    part_of_best_to_stay_alive = int(len(population) * 0.75)
     max_fitness = 0
     iteration = 0
     # TODO finish condition?
-    while iteration < 15:
+    while iteration < 60:
         max_fitness_state_index = np.argmax([individual["fitness"] for individual in population])
         current_max_fitness = population[max_fitness_state_index]["fitness"]
         if max_fitness >= current_max_fitness:
