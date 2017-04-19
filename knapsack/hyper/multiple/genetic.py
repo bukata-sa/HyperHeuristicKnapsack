@@ -4,8 +4,8 @@ import numpy as np
 from pathos.multiprocessing import ProcessPool as Pool
 
 from algorithms import genetic as gene
-from knapsack.hyper.multi import heuristics
-from knapsack.hyper.multi import problem
+from knapsack.hyper.multiple import heuristics
+from knapsack.hyper.multiple import problem
 from knapsack.hyper.single.genetic import mutation_hyper_ksp
 
 

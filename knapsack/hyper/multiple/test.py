@@ -1,8 +1,11 @@
+import random
+
 import numpy as np
 
-from knapsack.hyper.multi import genetic
-from knapsack.hyper.multi import lp_relaxed as lp
-from knapsack.hyper.multi import read_write_file as io
+from knapsack.hyper.multiple import genetic
+from knapsack.hyper.multiple import lp_relaxed as lp
+from knapsack.hyper.multiple import problem
+from knapsack.hyper.multiple import read_write_file as io
 
 mknap1_path, mknap2_path = "./resources/mknap1.txt", "./resources/mknap2.txt"
 mknapcbs_pathes = ["./resources/mknapcb1.txt", "./resources/mknapcb2.txt", "./resources/mknapcb3.txt",
@@ -15,11 +18,11 @@ mknapcbs_pathes = ["./resources/mknapcb1.txt", "./resources/mknapcb2.txt", "./re
 def generate_initial_knapsack(pseudo_optimal, weights, costs, sizes):
     initial_knapsack = np.zeros((len(sizes), len(costs)))
 
-    # for ksp_index in (range(len(sizes))):
-    #     for item_index in list(range(len(costs))):
-    #         pseudo_optimal_value = pseudo_optimal[ksp_index][item_index]
-    #         initial_knapsack[ksp_index][item_index] = random.randint(0, 1) if pseudo_optimal_value == 1 else 0
-    # initial_fitness = problem.solve(initial_knapsack, costs, weights, sizes)
+    for ksp_index in (range(len(sizes))):
+        for item_index in list(range(len(costs))):
+            pseudo_optimal_value = pseudo_optimal[ksp_index][item_index]
+            initial_knapsack[ksp_index][item_index] = random.randint(0, 1) if pseudo_optimal_value == 1 else 0
+    initial_fitness = problem.solve(initial_knapsack, costs, weights, sizes)
     return initial_knapsack
 
 
@@ -53,5 +56,5 @@ if __name__ == '__main__':
         print("KNAPSACK:")
         print("Number of KSPs: " + str(len(knapsack["sizes"])))
         print("Number of Items: " + str(len(knapsack["costs"])))
-        optimals.append(solve(knapsack, lp_optimal))
+        optimals.append(solve(knapsack, lp_optimal, attempts=2))
     print("CUMULATIVE GAP OVER ALL TEST DATA: " + str(optimals))

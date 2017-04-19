@@ -29,7 +29,7 @@ def get_heuristics():
                     ksp_index = indexed_properties.pop()[0]
                     single_ksp_kwargs = {"costs": kwargs["costs"], "weights": kwargs["weights"][ksp_index],
                                          "size": kwargs["sizes"][ksp_index]}
-                    # TODO should multi include constraint be here?
+                    # TODO should multiple include constraint be here?
                     multi_include_constraint = build_multi_include_constraint(current, ksp_index)
                     tabooed_indexes = list(set(tabooed_indexes).union(set(multi_include_constraint)))
                     new_included, modified_index = my_single_heuristic(current[ksp_index], tabooed_indexes,

@@ -3,7 +3,7 @@ import operator
 import numpy as np
 from cvxpy import *
 
-from knapsack.hyper.multi import problem
+from knapsack.hyper.multiple import problem
 
 
 def ksp_solve_lp_relaxed_convex(costs, weights, sizes):
