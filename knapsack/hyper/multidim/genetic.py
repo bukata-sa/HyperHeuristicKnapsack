@@ -1,3 +1,5 @@
+import math
+import operator
 import random as rnd
 
 import numpy as np
@@ -25,12 +27,23 @@ def fitness_hyper_ksp(state, **kwargs):
     return problem.solve(included, costs=kwargs["costs"], weights=kwargs["weights"], sizes=kwargs["sizes"])
 
 
-def crossover_reproduction_hyper_ksp(first_parent, second_parent, **kwargs):
-    # TODO: try other genetic operators (different types of crossover, for example)
-    # nor first allel nor last allel
-    crossover_index = rnd.randint(1, min(len(first_parent), len(second_parent) - 1))
-    child_candidate = first_parent[:crossover_index + 1] + second_parent[crossover_index + 1:]
-    return child_candidate
+def crossover_reproduction_hyper_ksp(population, **kwargs):
+    chunk_size = int(math.sqrt(len(population)))
+    chunks = [population[i:i + chunk_size] for i in range(0, len(population), chunk_size)]
+    champions = []
+    for chunk in chunks:
+        champions.append(max(chunk, key=operator.itemgetter("fitness")))
+
+    childs = []
+    for champion1 in champions:
+        for champion2 in champions:
+            if champion1 == champion2:
+                continue
+            crossover_point = rnd.randint(0, min(len(champion1["heuristics"]), len(champion2["heuristics"])) - 1)
+            child = champion1["heuristics"][:crossover_point] + champion2["heuristics"][crossover_point + 1:]
+            childs.append(child)
+
+    return childs
 
 
 def initial_population_generator_hyper_ksp(amount, dimension, **kwargs):

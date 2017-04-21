@@ -51,5 +51,5 @@ if __name__ == '__main__':
         print("KNAPSACK:")
         print("Number of constraints: " + str(len(knapsack["sizes"])))
         print("Number of items: " + str(len(knapsack["costs"])))
-        optimals.append(solve(knapsack, attempts=15))
+        optimals.append(solve(knapsack, attempts=1))
     print("CUMULATIVE GAP OVER ALL TEST DATA: " + str(optimals))

@@ -11,10 +11,10 @@ def get_heuristics():
         return cached_heuristics
     # probability to select add heuristic is 0.9
     add_heurs = [add_lightest, add_heaviest, add_least_cost, add_most_cost, add_best]
-    add_heurs = list(zip(add_heurs, [0.9 / len(add_heurs)] * len(add_heurs)))
+    add_heurs = list(zip(add_heurs, [0.7 / len(add_heurs)] * len(add_heurs)))
     # probability to select remove heuristic is 0.1
     remove_heurs = [remove_lightest, remove_heaviest, remove_least_cost, remove_most_cost, remove_worst]
-    remove_heurs = list(zip(remove_heurs, [0.1 / len(remove_heurs)] * len(remove_heurs)))
+    remove_heurs = list(zip(remove_heurs, [0.3 / len(remove_heurs)] * len(remove_heurs)))
     cached_heuristics = add_heurs + remove_heurs
     return cached_heuristics
 
@@ -85,3 +85,21 @@ def add_best(current, tabooed_indexes=None, **kwargs):
 def remove_worst(current, tabooed_indexes=None, **kwargs):
     priorities = weight_cost_priority_list(kwargs["costs"], kwargs["weights"][0])
     return update_ksp_extreme_property(current, False, False, priorities, tabooed_indexes=tabooed_indexes, **kwargs)
+
+
+def add_heaviest_overall_constraints(current, tabooed_indexes=None, **kwargs):
+    weights = np.asarray(kwargs["weights"])
+    sizes = np.asarray(kwargs["sizes"])
+    properties = [list(map(lambda x: size / x, weight)) for weight, size in zip(weights, sizes)]
+    properties = np.min(properties, axis=0)
+    return update_ksp_extreme_property(current, True, False, properties, tabooed_indexes=tabooed_indexes,
+                                       **kwargs)
+
+
+def add_lightest_overall_constraints(current, tabooed_indexes=None, **kwargs):
+    weights = np.asarray(kwargs["weights"])
+    sizes = np.asarray(kwargs["sizes"])
+    properties = [list(map(lambda x: size / x, weight)) for weight, size in zip(weights, sizes)]
+    properties = np.min(properties, axis=0)
+    return update_ksp_extreme_property(current, True, True, properties, tabooed_indexes=tabooed_indexes,
+                                       **kwargs)
