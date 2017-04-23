@@ -39,7 +39,7 @@ def crossover_reproduction_hyper_ksp(population, **kwargs):
         for champion2 in champions:
             if champion1 == champion2:
                 continue
-            crossover_point = rnd.randint(0, min(len(champion1["heuristics"]), len(champion2["heuristics"])) - 1)
+            crossover_point = min(len(champion1["heuristics"]), len(champion2["heuristics"])) // 2 - 1
             child = champion1["heuristics"][:crossover_point] + champion2["heuristics"][crossover_point + 1:]
             childs.append(child)
 

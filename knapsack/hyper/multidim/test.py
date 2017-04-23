@@ -9,6 +9,7 @@ mknapcbs_pathes = ["./resources/mknapcb1.txt", "./resources/mknapcb2.txt", "./re
                    "./resources/mknapcb5.txt", "./resources/mknapcb6.txt", "./resources/mknapcb7.txt",
                    "./resources/mknapcb8.txt",
                    "./resources/mknapcb9.txt"]
+mknapres_path = "./resources/mkcbres.txt"
 
 
 def generate_initial_knapsack(optimal, weights, costs, sizes):
@@ -44,7 +45,7 @@ def solve(knapsack, attempts=50):
 
 
 if __name__ == '__main__':
-    knapsacks = io.parse_mknap2(mknap2_path)
+    knapsacks = io.parse_mknapcb(mknapcbs_pathes[0], mknapres_path)
     # lp_optimals = [lp.ksp_solve_lp_relaxed_greedy(**knapsack) for knapsack in knapsacks]
     optimals = []
     for knapsack in list(knapsacks):

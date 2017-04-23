@@ -22,7 +22,6 @@ def crossover_selection(population, part_of_best_to_stay_alive, crossover_reprod
 
 
 def minimize(dimension, initial_population_generator, crossover_reproduction, mutation_func, fitness_func, **kwargs):
-    # TODO how ti initialize population amount?
     first = time.perf_counter()
     population = initial_population_generator(300, dimension, **kwargs)
     print("Population generation time: " + str(time.perf_counter() - first))
