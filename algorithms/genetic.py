@@ -6,7 +6,7 @@ import numpy as np
 
 def crossover_selection(population, part_of_best_to_stay_alive, crossover_reproduction_func, mutation_func,
                         fitness_func, **kwargs):
-    population = list(sorted(population, key=operator.itemgetter("fitness"), reverse=True))[:part_of_best_to_stay_alive]
+    population = list(sorted(population, key=operator.itemgetter("fitness"), reverse=True))[:len(population) // 2]
 
     childs = crossover_reproduction_func(population, **kwargs)
 

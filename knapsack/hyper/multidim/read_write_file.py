@@ -69,10 +69,10 @@ def parse_mknapcb(source_path, result_path):
     with open(source_path) as file_sources:
         with open(result_path) as file_results:
             number_of_cases = int(file_sources.readline())
-            _, optimal = file_results.readline().split(' ')
-            optimal = int(optimal)
             for case in range(number_of_cases):
                 _, item_number, ksp_number, _, _ = file_sources.readline().split(' ')
+                _, optimal = file_results.readline().split(' ')
+                optimal = int(optimal)
                 item_number = int(item_number)
                 ksp_number = int(ksp_number)
 

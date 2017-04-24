@@ -37,22 +37,42 @@ def update_ksp_extreme_property(current, is_add, is_max, properties, tabooed_ind
 
 
 def add_lightest(current, tabooed_indexes=None, **kwargs):
-    return update_ksp_extreme_property(current, True, False, kwargs["weights"][0], tabooed_indexes=tabooed_indexes,
+    weights = np.asarray(kwargs["weights"])
+    sizes = np.asarray(kwargs["sizes"])
+    properties = zip(sizes, weights)
+    properties = list(map(lambda x: x[0] / x[1], properties))
+    properties = np.sum(properties, axis=0)
+    return update_ksp_extreme_property(current, True, False, properties, tabooed_indexes=tabooed_indexes,
                                        **kwargs)
 
 
 def add_heaviest(current, tabooed_indexes=None, **kwargs):
-    return update_ksp_extreme_property(current, True, True, kwargs["weights"][0], tabooed_indexes=tabooed_indexes,
+    weights = np.asarray(kwargs["weights"])
+    sizes = np.asarray(kwargs["sizes"])
+    properties = zip(sizes, weights)
+    properties = list(map(lambda x: x[0] / x[1], properties))
+    properties = np.sum(properties, axis=0)
+    return update_ksp_extreme_property(current, True, True, properties, tabooed_indexes=tabooed_indexes,
                                        **kwargs)
 
 
 def remove_lightest(current, tabooed_indexes=None, **kwargs):
-    return update_ksp_extreme_property(current, False, False, kwargs["weights"][0], tabooed_indexes=tabooed_indexes,
+    weights = np.asarray(kwargs["weights"])
+    sizes = np.asarray(kwargs["sizes"])
+    properties = zip(sizes, weights)
+    properties = list(map(lambda x: x[0] / x[1], properties))
+    properties = np.sum(properties, axis=0)
+    return update_ksp_extreme_property(current, False, False, properties, tabooed_indexes=tabooed_indexes,
                                        **kwargs)
 
 
 def remove_heaviest(current, tabooed_indexes=None, **kwargs):
-    return update_ksp_extreme_property(current, False, True, kwargs["weights"][0], tabooed_indexes=tabooed_indexes,
+    weights = np.asarray(kwargs["weights"])
+    sizes = np.asarray(kwargs["sizes"])
+    properties = zip(sizes, weights)
+    properties = list(map(lambda x: x[0] / x[1], properties))
+    properties = np.sum(properties, axis=0)
+    return update_ksp_extreme_property(current, False, True, properties, tabooed_indexes=tabooed_indexes,
                                        **kwargs)
 
 
