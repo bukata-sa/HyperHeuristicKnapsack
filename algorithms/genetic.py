@@ -2,6 +2,7 @@ import operator
 import time
 
 import numpy as np
+from pathos.multiprocessing import ProcessPool as Pool
 
 
 def crossover_selection(population, part_of_best_to_stay_alive, crossover_reproduction_func, mutation_func,
@@ -13,11 +14,13 @@ def crossover_selection(population, part_of_best_to_stay_alive, crossover_reprod
     if childs is None or len(childs) == 0:
         return population
 
-    for child in childs:
+    def worker(child):
         mutation_func(child, **kwargs)
+        return {"heuristics": child, "fitness": fitness_func(child, **kwargs)}
 
-        new_individual = {"heuristics": child, "fitness": fitness_func(child, **kwargs)}
-        population.append(new_individual)
+    pool = Pool()
+    new_individuals = pool.map(worker, childs)
+    population += new_individuals
     return population
 
 
