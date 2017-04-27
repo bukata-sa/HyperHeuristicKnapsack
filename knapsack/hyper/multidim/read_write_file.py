@@ -1,6 +1,8 @@
 ################################################################################################
 #               http://people.brunel.ac.uk/~mastjjb/jeb/orlib/mknapinfo.html                   #
 ################################################################################################
+import os
+import pickle
 
 
 def parse_mknap1(path_to_file):
@@ -64,40 +66,50 @@ def parse_mknap2(path_to_file):
     return results
 
 
-def parse_mknapcb(source_path, result_path):
+def parse_mknapcb(mknapcb_pathes, result_path):
+    if os.path.isfile('resources/mknapcbs.pickle'):
+        with open('resources/mknapcbs.pickle', 'rb') as out:
+            return pickle.load(out)
+
     results = []
-    with open(source_path) as file_sources:
-        with open(result_path) as file_results:
-            number_of_cases = int(file_sources.readline())
-            for case in range(number_of_cases):
-                _, item_number, ksp_number, _, _ = file_sources.readline().split(' ')
-                _, optimal = file_results.readline().split(' ')
-                optimal = int(optimal)
-                item_number = int(item_number)
-                ksp_number = int(ksp_number)
+    with open(result_path) as file_results:
+        for mknapcb_path in mknapcb_pathes:
+            knapsack_chunk = []
+            with open(mknapcb_path) as file_sources:
+                number_of_cases = int(file_sources.readline())
+                for case in range(number_of_cases):
+                    _, item_number, ksp_number, _, _ = file_sources.readline().split(' ')
+                    _, optimal = file_results.readline().split(' ')
+                    optimal = int(optimal)
+                    item_number = int(item_number)
+                    ksp_number = int(ksp_number)
 
-                costs = []
-                while len(costs) < item_number:
-                    costs += [float(cost) for cost in file_sources.readline().split(' ') if cost not in ('', '\n')]
+                    costs = []
+                    while len(costs) < item_number:
+                        costs += [float(cost) for cost in file_sources.readline().split(' ') if cost not in ('', '\n')]
 
-                weights = []
-                for i in range(ksp_number):
-                    current_weight = []
-                    while len(current_weight) < item_number:
-                        current_weight += [int(weight) for weight in file_sources.readline().split(' ') if
-                                           weight not in ('', '\n')]
-                    weights.append(current_weight)
+                    weights = []
+                    for i in range(ksp_number):
+                        current_weight = []
+                        while len(current_weight) < item_number:
+                            current_weight += [int(weight) for weight in file_sources.readline().split(' ') if
+                                               weight not in ('', '\n')]
+                        weights.append(current_weight)
 
-                sizes = []
-                while len(sizes) < ksp_number:
-                    sizes += [float(size) for size in file_sources.readline().split(' ') if size not in ('', '\n')]
+                    sizes = []
+                    while len(sizes) < ksp_number:
+                        sizes += [float(size) for size in file_sources.readline().split(' ') if size not in ('', '\n')]
 
-                results.append({
-                    'costs': costs,
-                    'weights': weights,
-                    'sizes': sizes,
-                    'optimal': optimal
-                })
+                    knapsack_chunk.append({
+                        'costs': costs,
+                        'weights': weights,
+                        'sizes': sizes,
+                        'optimal': optimal
+                    })
+            results.append(knapsack_chunk)
+
+    with open('resources/mknapcbs.pickle', 'wb') as out:
+        pickle.dump(results, out)
     return results
 
 

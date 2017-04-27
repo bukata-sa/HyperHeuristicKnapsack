@@ -45,12 +45,12 @@ def solve(knapsack, attempts=50):
 
 
 if __name__ == '__main__':
-    knapsacks = io.parse_mknapcb(mknapcbs_pathes[0], mknapres_path)
+    knapsacks = io.parse_mknapcb(mknapcbs_pathes, mknapres_path)
     # lp_optimals = [lp.ksp_solve_lp_relaxed_greedy(**knapsack) for knapsack in knapsacks]
     optimals = []
-    for knapsack in list(knapsacks):
+    for knapsack in list(knapsacks[2]):
         print("KNAPSACK:")
         print("Number of constraints: " + str(len(knapsack["sizes"])))
         print("Number of items: " + str(len(knapsack["costs"])))
-        optimals.append(solve(knapsack, attempts=1))
+        optimals.append(solve(knapsack, attempts=20))
     print("CUMULATIVE GAP OVER ALL TEST DATA: " + str(optimals))
