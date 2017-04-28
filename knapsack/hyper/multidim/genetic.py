@@ -3,6 +3,7 @@ import operator
 import random as rnd
 
 import numpy as np
+import time
 from pathos.multiprocessing import ProcessPool as Pool
 
 from algorithms import genetic as gene
@@ -115,5 +116,5 @@ def mutation_hyper_multi_ksp(state, **kwargs):
 
 
 def minimize(**kwargs):
-    return gene.minimize(None, initial_population_generator_hyper_ksp, crossover_reproduction_hyper_ksp,
+    return gene.minimize(None, initial_population_generator_hyper_ksp_multiproc, crossover_reproduction_hyper_ksp,
                          mutation_hyper_multi_ksp, fitness_hyper_ksp, **kwargs)
