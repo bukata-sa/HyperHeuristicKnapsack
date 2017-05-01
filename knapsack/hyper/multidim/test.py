@@ -2,6 +2,7 @@ import numpy as np
 
 from knapsack.hyper.multidim import genetic
 from knapsack.hyper.multidim import read_write_file as io
+import pickle
 
 mknap1_path, mknap2_path = "./resources/mknap1.txt", "./resources/mknap2.txt"
 mknapcbs_pathes = ["./resources/mknapcb1.txt", "./resources/mknapcb2.txt", "./resources/mknapcb3.txt",
@@ -28,6 +29,7 @@ def solve(knapsack, attempts=50):
     result = 0
     cumulative_gap = 0
     print("Optimal_fitness:\t" + str(optimal_fitness))
+    solved = []
     # TODO generate initial state using LP-relaxed solution
     for i in range(1, attempts + 1):
         start = generate_initial_knapsack(**knapsack)
@@ -35,22 +37,36 @@ def solve(knapsack, attempts=50):
                                          sizes=knapsack["sizes"], included=start)
         current = genetic.fitness_hyper_ksp(optimal_funcs, weights=knapsack["weights"], costs=knapsack["costs"],
                                             sizes=knapsack["sizes"], included=start)
-        print("Current:\t" + str(optimal_fitness - current))
-        result += optimal_fitness - current
-        current_gap = 100 * (optimal_fitness - current) / optimal_fitness
+        fitness_current_diff = optimal_fitness - current
+        print("Current:\t" + str(fitness_current_diff))
+        solved.append(fitness_current_diff)
+        result += fitness_current_diff
+        current_gap = 100 * (fitness_current_diff) / optimal_fitness
         print("Normalized:\t" + str(current_gap))
         cumulative_gap += current_gap
         print("Normed cum:\t" + str(cumulative_gap / i))
-    return cumulative_gap / attempts
+    return solved, cumulative_gap / attempts
 
 
 if __name__ == '__main__':
-    knapsacks = io.parse_mknapcb(mknapcbs_pathes, mknapres_path)
+    # knapsacks = io.parse_mknapcb(mknapcbs_pathes, mknapres_path)
+    knapsacks = io.parse_mknap1(mknap1_path)
     # lp_optimals = [lp.ksp_solve_lp_relaxed_greedy(**knapsack) for knapsack in knapsacks]
     optimals = []
-    for knapsack in list(knapsacks[2]):
+    results = []
+    ksp_number = 0
+    for knapsack in list(knapsacks):
         print("KNAPSACK:")
         print("Number of constraints: " + str(len(knapsack["sizes"])))
         print("Number of items: " + str(len(knapsack["costs"])))
-        optimals.append(solve(knapsack, attempts=20))
+        solved, normalized = solve(knapsack, attempts=3)
+        optimals.append(normalized)
+        with open("resources/output/mknap1_out_" + str(ksp_number) + ".pckl", 'wb') as out:
+            pickle.dump({
+                "const": len(knapsack["sizes"]),
+                "items": len(knapsack["costs"]),
+                "solved": solved,
+                "normalized:": normalized
+            }, out)
+        ksp_number += 1
     print("CUMULATIVE GAP OVER ALL TEST DATA: " + str(optimals))
