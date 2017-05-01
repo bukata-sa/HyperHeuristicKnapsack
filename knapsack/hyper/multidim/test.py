@@ -1,8 +1,9 @@
+import pickle
+
 import numpy as np
 
 from knapsack.hyper.multidim import genetic
 from knapsack.hyper.multidim import read_write_file as io
-import pickle
 
 mknap1_path, mknap2_path = "./resources/mknap1.txt", "./resources/mknap2.txt"
 mknapcbs_pathes = ["./resources/mknapcb1.txt", "./resources/mknapcb2.txt", "./resources/mknapcb3.txt",
@@ -44,7 +45,7 @@ def solve(knapsack, attempts=50):
         current_gap = 100 * (fitness_current_diff) / optimal_fitness
         print("Normalized:\t" + str(current_gap))
         cumulative_gap += current_gap
-        print("Normed cum:\t" + str(cumulative_gap / i))
+        print("Normed cum:\t" + str(cumulative_gap / (attempts + 1)))
     return solved, cumulative_gap / attempts
 
 

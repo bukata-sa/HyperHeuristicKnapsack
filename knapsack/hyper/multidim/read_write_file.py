@@ -113,7 +113,17 @@ def parse_mknapcb(mknapcb_pathes, result_path):
     return results
 
 
+def print_statistics(path_to_ksp_dir):
+    average = 0
+    ksp_stat_files = os.listdir(path_to_ksp_dir)
+    n = len(ksp_stat_files)
+    for ksp_path in ksp_stat_files:
+        with open(path_to_ksp_dir + "/" + ksp_path, 'rb') as ksp_stat_file:
+            ksp_stat = pickle.load(ksp_stat_file)
+            average += ksp_stat['normalized:'] / n
+    print(average)
+
 if __name__ == '__main__':
     # pprint(parse_mknap1("./resources/mknap1.txt"))
     # pprint(parse_mknap2("./resources/mknap2.txt"))
-    parse_mknapcb("./resources/mknapcb1.txt")
+    print_statistics("./resources/output/mknap1")
