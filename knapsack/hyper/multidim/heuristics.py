@@ -22,7 +22,7 @@ def get_heuristics():
 
 
 def update_ksp_extreme_property(current, is_add, is_max, properties, tabooed_indexes=None, **kwargs):
-    index_property_list = [element for element in enumerate(properties)]
+    index_property_list = (element for element in enumerate(properties))
     indexes_property_sorted = [index[0] for index in
                                sorted(index_property_list, key=operator.itemgetter(1), reverse=not is_max)]
     while len(indexes_property_sorted) > 0:
@@ -80,7 +80,7 @@ def remove_most_cost(current, tabooed_indexes=None, **kwargs):
 
 
 def weight_cost_priority_list(costs, weights):
-    return list(map(lambda x: x[0] / float(x[1]) if x[1] != 0 else np.inf, zip(costs, weights)))
+    return map(lambda x: x[0] / float(x[1]) if x[1] != 0 else np.inf, zip(costs, weights))
 
 
 def add_best(current, tabooed_indexes=None, **kwargs):

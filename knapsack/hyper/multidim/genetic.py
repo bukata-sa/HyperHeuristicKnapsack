@@ -2,6 +2,7 @@ import itertools
 import math
 import operator
 import random as rnd
+from functools import partial
 
 import numpy as np
 from pathos.multiprocessing import ProcessPool as Pool
@@ -17,7 +18,7 @@ def fitness_hyper_ksp(state, **kwargs):
     included = list(kwargs["included"])
     tabooed_items_generations = [0] * len(kwargs["costs"])
     for operation, tabu_generation in state:
-        tabooed_items = [index for index, generation in enumerate(tabooed_items_generations) if generation > 0]
+        tabooed_items = (index for index, generation in enumerate(tabooed_items_generations) if generation > 0)
         included, modified_index = operation(included, tabooed_indexes=tabooed_items, costs=kwargs["costs"],
                                              weights=kwargs["weights"], sizes=kwargs["sizes"])
         tabooed_items_generations = list(map(lambda x: x - 1 if x > 0 else 0, tabooed_items_generations))
@@ -30,18 +31,20 @@ def fitness_hyper_ksp(state, **kwargs):
 
 def crossover_reproduction_hyper_ksp(population, **kwargs):
     chunk_size = int(math.sqrt(len(population)))
-    chunks = [population[i:i + chunk_size] for i in range(0, len(population), chunk_size)]
-    champions = []
-    for chunk in chunks:
-        champions.append(max(chunk, key=operator.itemgetter("fitness")))
+    chunks = (population[i:i + chunk_size] for i in range(0, len(population), chunk_size))
 
-    childs = []
-    for champion1, champion2 in itertools.permutations(champions, 2):
-        crossover_point = min(len(champion1["heuristics"]), len(champion2["heuristics"])) // 2 - 1
-        child = champion1["heuristics"][:crossover_point] + champion2["heuristics"][crossover_point + 1:]
-        child = fit_generated_child(child, **kwargs)
-        childs.append(child)
-        return childs
+    champions = map(lambda chunk: max(chunk, key=operator.itemgetter("fitness")), chunks)
+
+    cross_child_partial = partial(cross_child, **kwargs)
+    childs = map(cross_child_partial, *zip(*itertools.permutations(champions, 2)))
+    return list(childs)
+
+
+def cross_child(child1, child2, **kwargs):
+    crossover_point = min(len(child1["heuristics"]), len(child2["heuristics"])) // 2 - 1
+    child = child1["heuristics"][:crossover_point] + child2["heuristics"][crossover_point + 1:]
+    child = fit_generated_child(child, **kwargs)
+    return child
 
 
 def fit_generated_child(child, **kwargs):
@@ -119,7 +122,7 @@ def simple_state_generator_hyper_ksp(state, heuristics_candidates, **kwargs):
                 break
         operation = heuristics_candidates[index][0]
 
-        tabooed_items = [index for index, generation in enumerate(tabooed_items_generations) if generation > 0]
+        tabooed_items = (index for index, generation in enumerate(tabooed_items_generations) if generation > 0)
         included, modified_index = operation(included, tabooed_indexes=tabooed_items, costs=kwargs["costs"],
                                              weights=kwargs["weights"], sizes=kwargs["sizes"])
 
