@@ -3,7 +3,6 @@ import operator
 import random as rnd
 
 import numpy as np
-import time
 from pathos.multiprocessing import ProcessPool as Pool
 
 from algorithms import genetic as gene
@@ -90,7 +89,7 @@ def simple_state_generator_hyper_ksp(dimension, heuristics_candidates, **kwargs)
     # TODO find better end condition
     while any(included < 1) and local_max_not_reached(weights, included, sizes):
         probability = rnd.random()
-        tabu_generation = rnd.randint(3, 6) if probability < 0.1 else 0
+        tabu_generation = rnd.randint(1, 5) if probability < 0.3 else 0
         probability = rnd.random()
         cumulative_probability = 0
         for index, heuristics_candidate in enumerate(heuristics_candidates):
