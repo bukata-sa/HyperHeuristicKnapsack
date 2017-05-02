@@ -12,11 +12,11 @@ def get_heuristics():
     # probability to select add heuristic is 0.9
     add_heurs = [add_lightest, add_heaviest, add_least_cost, add_most_cost, add_best, add_heaviest_item_heaviest_condition, add_lightest_item_heaviest_condition, add_heaviest_item_lightest_condition,
                  add_lightest_item_lightest_condition]
-    add_heurs = list(zip(add_heurs, [0.5 / len(add_heurs)] * len(add_heurs)))
+    add_heurs = list(zip(add_heurs, [0.8 / len(add_heurs)] * len(add_heurs)))
     # probability to select remove heuristic is 0.1
     remove_heurs = [remove_lightest, remove_heaviest, remove_least_cost, remove_most_cost, remove_worst, remove_heaviest_item_heaviest_condition, remove_lightest_item_heaviest_condition,
                     remove_heaviest_item_lightest_condition, remove_lightest_item_lightest_condition]
-    remove_heurs = list(zip(remove_heurs, [0.5 / len(remove_heurs)] * len(remove_heurs)))
+    remove_heurs = list(zip(remove_heurs, [0.3 / len(remove_heurs)] * len(remove_heurs)))
     cached_heuristics = add_heurs + remove_heurs
     return cached_heuristics
 
@@ -170,5 +170,7 @@ def remove_heaviest_item_lightest_condition(current, tabooed_indexes=None, **kwa
 def calculate_relative_weights(weights, sizes):
     weights = np.asarray(weights)
     sizes = np.asarray(sizes)
-    properties = np.sum(weights, axis=1) / sizes
+    properties = zip(sizes, weights)
+    properties = list(map(lambda x: x[0] / x[1], properties))
+    properties = np.sum(properties, axis=0)
     return properties

@@ -1,6 +1,8 @@
 import numpy as np
+from numba import jit
 
 
+@jit
 def solve(included, costs, weights, sizes):
     costs = np.asarray(costs)
     included = np.asarray(included)
@@ -11,6 +13,7 @@ def solve(included, costs, weights, sizes):
     return np.sum(costs * included)
 
 
+@jit
 def validate(included, costs, weights, sizes):
     weights = np.asarray(weights)
     costs = np.asarray(costs)

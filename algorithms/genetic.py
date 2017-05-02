@@ -24,9 +24,9 @@ def crossover_selection(population, crossover_reproduction_func, mutation_func,
     return population
 
 
-def minimize(dimension, initial_population_generator, crossover_reproduction, mutation_func, fitness_func, **kwargs):
+def minimize(initial_population_generator, crossover_reproduction, mutation_func, fitness_func, **kwargs):
     first = time.perf_counter()
-    population = initial_population_generator(300, dimension, **kwargs)
+    population = initial_population_generator(300, **kwargs)
     print("Population generation time: " + str(time.perf_counter() - first))
     max_fitness = 0
     max_fitness_heuristics = 0

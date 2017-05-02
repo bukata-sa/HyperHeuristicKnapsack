@@ -45,18 +45,18 @@ def solve(knapsack, attempts=50):
         current_gap = 100 * (fitness_current_diff) / optimal_fitness
         print("Normalized:\t" + str(current_gap))
         cumulative_gap += current_gap
-        print("Normed cum:\t" + str(cumulative_gap / (attempts + 1)))
+        print("Normed cum:\t" + str(cumulative_gap / attempts))
     return solved, cumulative_gap / attempts
 
 
 if __name__ == '__main__':
-    # knapsacks = io.parse_mknap1(mknapcbs_pathes, mknapres_path)
+    # knapsacks = io.parse_mknapcb(mknapcbs_pathes, mknapres_path)
     knapsacks = io.parse_mknap1(mknap1_path)
     # lp_optimals = [lp.ksp_solve_lp_relaxed_greedy(**knapsack) for knapsack in knapsacks]
     optimals = []
     results = []
     ksp_number = 0
-    for knapsack in list(knapsacks)[len(knapsacks) - 2:]:
+    for knapsack in knapsacks:
         print("KNAPSACK:")
         print("Number of constraints: " + str(len(knapsack["sizes"])))
         print("Number of items: " + str(len(knapsack["costs"])))
