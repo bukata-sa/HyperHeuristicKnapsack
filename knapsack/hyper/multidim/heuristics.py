@@ -10,11 +10,14 @@ def get_heuristics():
     if cached_heuristics is not None:
         return cached_heuristics
     # probability to select add heuristic is 0.9
-    add_heurs = [add_lightest, add_heaviest, add_least_cost, add_most_cost, add_best, add_heaviest_item_heaviest_condition, add_lightest_item_heaviest_condition, add_heaviest_item_lightest_condition,
+    add_heurs = [add_lightest, add_heaviest, add_least_cost, add_most_cost, add_best,
+                 add_heaviest_item_heaviest_condition, add_lightest_item_heaviest_condition,
+                 add_heaviest_item_lightest_condition,
                  add_lightest_item_lightest_condition]
     add_heurs = list(zip(add_heurs, [0.8 / len(add_heurs)] * len(add_heurs)))
     # probability to select remove heuristic is 0.1
-    remove_heurs = [remove_lightest, remove_heaviest, remove_least_cost, remove_most_cost, remove_worst, remove_heaviest_item_heaviest_condition, remove_lightest_item_heaviest_condition,
+    remove_heurs = [remove_lightest, remove_heaviest, remove_least_cost, remove_most_cost, remove_worst,
+                    remove_heaviest_item_heaviest_condition, remove_lightest_item_heaviest_condition,
                     remove_heaviest_item_lightest_condition, remove_lightest_item_lightest_condition]
     remove_heurs = list(zip(remove_heurs, [0.3 / len(remove_heurs)] * len(remove_heurs)))
     cached_heuristics = add_heurs + remove_heurs
@@ -77,10 +80,6 @@ def remove_least_cost(current, tabooed_indexes=None, **kwargs):
 
 def remove_most_cost(current, tabooed_indexes=None, **kwargs):
     return update_ksp_extreme_property(current, False, True, kwargs["costs"], tabooed_indexes=tabooed_indexes, **kwargs)
-
-
-def weight_cost_priority_list(costs, weights):
-    return map(lambda x: x[0] / float(x[1]) if x[1] != 0 else np.inf, zip(costs, weights))
 
 
 def add_best(current, tabooed_indexes=None, **kwargs):
@@ -174,3 +173,7 @@ def calculate_relative_weights(weights, sizes):
     properties = list(map(lambda x: x[0] / x[1], properties))
     properties = np.sum(properties, axis=0)
     return properties
+
+
+def weight_cost_priority_list(costs, weights):
+    return map(lambda x: x[0] * x[1], zip(costs, weights))

@@ -1,5 +1,3 @@
-import pickle
-
 import numpy as np
 
 from knapsack.hyper.multidim import genetic
@@ -56,19 +54,19 @@ if __name__ == '__main__':
     optimals = []
     results = []
     ksp_number = 0
-    for knapsack in knapsacks:
+    for knapsack in knapsacks[len(knapsacks) - 2:]:
         print("KNAPSACK:")
         print("Number of constraints: " + str(len(knapsack["sizes"])))
         print("Number of items: " + str(len(knapsack["costs"])))
         solved, normalized = solve(knapsack, attempts=10)
         optimals.append(normalized)
-        with open("resources/output/mknapcbs/mknapcb2_out_" + str(ksp_number) + ".pckl", 'wb') as out:
-            pickle.dump({
-                "const": len(knapsack["sizes"]),
-                "items": len(knapsack["costs"]),
-                "solved": solved,
-                "normalized:": normalized
-            }, out)
+        # with open("resources/output/mknapcbs/mknapcb2_out_" + str(ksp_number) + ".pckl", 'wb') as out:
+        #     pickle.dump({
+        #         "const": len(knapsack["sizes"]),
+        #         "items": len(knapsack["costs"]),
+        #         "solved": solved,
+        #         "normalized:": normalized
+        #     }, out)
         ksp_number += 1
         print()
     print("CUMULATIVE GAP OVER ALL TEST DATA: " + str(optimals))

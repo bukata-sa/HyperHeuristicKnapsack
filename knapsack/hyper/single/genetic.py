@@ -42,11 +42,9 @@ def mutation_hyper_single_ksp(state, **kwargs):
     return mutation_hyper_ksp(state, heurs, **kwargs)
 
 
-# probability 0.6 that state won't be changed
-# probability 0.4 that at least one mutation will be applied
 def mutation_hyper_ksp(state, heuristic_source, **kwargs):
     genome_amount = 5 if len(state) > 5 else len(state) // 2 + 1
-    # mutate heuristics order with tabu (reorder tuples)
+    # mutate heuristics order
     if rnd.random() < 0.12:
         shuffle_start_index = rnd.randint(0, len(state) - genome_amount)
         to_shuffle = state[shuffle_start_index:shuffle_start_index + genome_amount]
@@ -58,31 +56,11 @@ def mutation_hyper_ksp(state, heuristic_source, **kwargs):
         heurs_indexes_to_update = rnd.sample(range(len(state)), genome_amount)
         while len(heurs_indexes_to_update) > 0:
             index = heurs_indexes_to_update.pop()
-            heurs, tabu = state[index]
+            heurs = state[index]
             candidate_heurs = rnd.choice(heuristic_source.get_heuristics())[0]
             while candidate_heurs == heurs:
                 candidate_heurs = rnd.choice(heuristic_source.get_heuristics())[0]
-            state[index] = candidate_heurs, tabu
-
-    # mutate tabu indexes
-    if rnd.random() < 0.12:
-        tabu_indexes_to_update = rnd.sample(range(len(state)), genome_amount)
-        while len(tabu_indexes_to_update) > 0:
-            index = tabu_indexes_to_update.pop()
-            heurs, tabu = state[index]
-            candidate_tabu = rnd.randint(0, 3)
-            while candidate_tabu == tabu:
-                candidate_tabu = rnd.randint(0, 3)
-            state[index] = heurs, candidate_tabu
-
-    # mutate heuristics order without tabu
-    if rnd.random() < 0.12:
-        shuffle_start_index = rnd.randint(0, len(state) - genome_amount)
-        to_shuffle = state[shuffle_start_index:shuffle_start_index + genome_amount]
-        rnd.shuffle(to_shuffle)
-        to_shuffle = zip(to_shuffle, state[shuffle_start_index:shuffle_start_index + genome_amount])
-        to_shuffle = list(map(lambda x: (x[0][0], x[1][1]), to_shuffle))
-        state[shuffle_start_index:shuffle_start_index + genome_amount] = to_shuffle
+            state[index] = candidate_heurs
 
     return state
 

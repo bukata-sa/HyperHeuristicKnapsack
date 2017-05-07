@@ -14,18 +14,10 @@ from knapsack.hyper.single.genetic import mutation_hyper_ksp
 
 
 def fitness_hyper_ksp(state, **kwargs):
-    # TODO: avoid copypaste
     included = list(kwargs["included"])
-    tabooed_items_generations = [0] * len(kwargs["costs"])
-    for operation, tabu_generation in state:
-        tabooed_items = (index for index, generation in enumerate(tabooed_items_generations) if generation > 0)
-        included, modified_index = operation(included, tabooed_indexes=tabooed_items, costs=kwargs["costs"],
+    for operation in state:
+        included, modified_index = operation(included, tabooed_indexes=[], costs=kwargs["costs"],
                                              weights=kwargs["weights"], sizes=kwargs["sizes"])
-        tabooed_items_generations = list(map(lambda x: x - 1 if x > 0 else 0, tabooed_items_generations))
-
-        # TODO if modified index is -1, should we exclude the operation from the state?
-        if tabu_generation > 0 and modified_index >= 0:
-            tabooed_items_generations[modified_index] = tabu_generation
     return problem.solve(included, costs=kwargs["costs"], weights=kwargs["weights"], sizes=kwargs["sizes"])
 
 
@@ -36,8 +28,8 @@ def crossover_reproduction_hyper_ksp(population, **kwargs):
     champions = map(lambda chunk: max(chunk, key=operator.itemgetter("fitness")), chunks)
 
     cross_child_partial = partial(cross_child, **kwargs)
-    childs = map(cross_child_partial, *zip(*itertools.permutations(champions, 2)))
-    return list(childs)
+    childs = list(map(cross_child_partial, *zip(*itertools.permutations(champions, 2))))
+    return childs
 
 
 def cross_child(child1, child2, **kwargs):
@@ -49,34 +41,29 @@ def cross_child(child1, child2, **kwargs):
 
 def fit_generated_child(child, **kwargs):
     included = list(kwargs["included"])
-    tabooed_items_generations = [0] * len(kwargs["costs"])
 
     deleted_offset = 0
-    for index, operation_and_tabu_generation in enumerate(child[:]):
-        operation, tabu_generation = operation_and_tabu_generation
-        tabooed_items = [index for index, generation in enumerate(tabooed_items_generations) if generation > 0]
-        included, modified_index = operation(included, tabooed_indexes=tabooed_items, costs=kwargs["costs"],
+    for index, operation in enumerate(child[:]):
+        included, modified_index = operation(included, tabooed_indexes=[], costs=kwargs["costs"],
                                              weights=kwargs["weights"], sizes=kwargs["sizes"])
-        tabooed_items_generations = list(map(lambda x: x - 1 if x > 0 else 0, tabooed_items_generations))
 
         if modified_index == -1:
             del child[index - deleted_offset]
             deleted_offset += 1
             continue
 
-        if tabu_generation > 0:
-            tabooed_items_generations[modified_index] = tabu_generation
-
-    fitted_child = simple_state_generator_hyper_ksp(child, heuristics.get_heuristics(), included=included, costs=kwargs["costs"], weights=kwargs["weights"], sizes=kwargs["sizes"])
+    fitted_child = simple_state_generator_hyper_ksp(child, heuristics.get_heuristics(), included=included,
+                                                    costs=kwargs["costs"], weights=kwargs["weights"],
+                                                    sizes=kwargs["sizes"])
     return fitted_child
 
 
-# deprecated
-def initial_population_generator_hyper_ksp(amount, dimension, **kwargs):
+# test purposes only
+def initial_population_generator_hyper_ksp(amount, **kwargs):
     population = []
     heuristics_candidates = heuristics.get_heuristics()
     for i in range(amount):
-        state = simple_state_generator_hyper_ksp(dimension, heuristics_candidates, **kwargs)
+        state = simple_state_generator_hyper_ksp([], heuristics_candidates, **kwargs)
         population.append({"heuristics": state, "fitness": fitness_hyper_ksp(state, **kwargs)})
     return population
 
@@ -94,14 +81,17 @@ def initial_population_generator_hyper_ksp_multiproc(amount, **kwargs):
     return population
 
 
-def local_max_not_reached(weights, included, sizes):
+def local_max_reached(weights, included, sizes, tabooed_items):
     items_not_included = np.where(included < 1)[0]
+    tabooed_items = np.asarray(tabooed_items)
+    items_tabooed = np.where(tabooed_items > 0)[0]
+    available_items = set(items_not_included).difference(set(items_tabooed))
     reached = True
-    for item in items_not_included:
+    for item in available_items:
         if all(np.sum(weights * included, axis=1) + weights[:, item] < sizes):
             reached = False
             break
-    return not reached
+    return reached
 
 
 def simple_state_generator_hyper_ksp(state, heuristics_candidates, **kwargs):
@@ -111,10 +101,9 @@ def simple_state_generator_hyper_ksp(state, heuristics_candidates, **kwargs):
     tabooed_items_generations = [0] * len(kwargs["costs"])
 
     # select heuristics for state while not reached local maximum
-    while any(included < 1) and local_max_not_reached(weights, included, sizes):
+    local_max_reached_times = 0
+    while any(included < 1):
         probability = rnd.random()
-        tabu_generation = rnd.randint(1, 5) if probability < 0.3 else 0
-
         cumulative_probability = 0
         for index, heuristics_candidate in enumerate(heuristics_candidates):
             cumulative_probability += heuristics_candidate[1]
@@ -126,14 +115,18 @@ def simple_state_generator_hyper_ksp(state, heuristics_candidates, **kwargs):
         included, modified_index = operation(included, tabooed_indexes=tabooed_items, costs=kwargs["costs"],
                                              weights=kwargs["weights"], sizes=kwargs["sizes"])
 
-        if modified_index == -1:
-            continue
-
-        state.append((operation, tabu_generation))
+        state.append(operation)
         tabooed_items_generations = list(map(lambda x: x - 1 if x > 0 else 0, tabooed_items_generations))
 
-        if tabu_generation > 0:
-            tabooed_items_generations[modified_index] = tabu_generation
+        if local_max_reached(weights, included, sizes, tabooed_items_generations):
+            local_max_reached_times += 1
+            if local_max_reached_times == 5:
+                break
+            state.pop()
+
+            if modified_index == -1:
+                continue
+            tabooed_items_generations[modified_index] = rnd.randint(3, 7)
     return state
 
 
