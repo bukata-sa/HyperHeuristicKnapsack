@@ -1,14 +1,11 @@
-import operator
 import time
 
 import numpy as np
 from pathos.multiprocessing import ProcessPool as Pool
 
 
-def crossover_selection(population, crossover_reproduction_func, mutation_func,
-                        fitness_func, **kwargs):
-    population = list(sorted(population, key=operator.itemgetter("fitness"), reverse=True))[len(population) // 2:]
-
+def crossover(population, crossover_reproduction_func, mutation_func,
+              fitness_func, **kwargs):
     childs = crossover_reproduction_func(population, **kwargs)
 
     if childs is None or len(childs) == 0:
@@ -24,7 +21,8 @@ def crossover_selection(population, crossover_reproduction_func, mutation_func,
     return population
 
 
-def minimize(initial_population_generator, crossover_reproduction, mutation_func, fitness_func, **kwargs):
+def minimize(initial_population_generator, selection_func, crossover_reproduction, mutation_func, fitness_func,
+             **kwargs):
     first = time.perf_counter()
     population = initial_population_generator(300, **kwargs)
     print("Population generation time: " + str(time.perf_counter() - first))
@@ -43,5 +41,6 @@ def minimize(initial_population_generator, crossover_reproduction, mutation_func
             max_fitness = current_max_fitness
             max_fitness_heuristics = population[current_max_fitness_state_index]["heuristics"]
             iteration = 0
-        population = crossover_selection(population, crossover_reproduction, mutation_func, fitness_func, **kwargs)
+        population = selection_func(population)
+        population = crossover(population, crossover_reproduction, mutation_func, fitness_func, **kwargs)
     return max_fitness_heuristics

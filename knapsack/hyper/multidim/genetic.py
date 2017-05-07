@@ -1,5 +1,4 @@
 import itertools
-import math
 import operator
 import random as rnd
 from functools import partial
@@ -19,24 +18,6 @@ def fitness_hyper_ksp(state, **kwargs):
         included, modified_index = operation(included, tabooed_indexes=[], costs=kwargs["costs"],
                                              weights=kwargs["weights"], sizes=kwargs["sizes"])
     return problem.solve(included, costs=kwargs["costs"], weights=kwargs["weights"], sizes=kwargs["sizes"])
-
-
-def crossover_reproduction_hyper_ksp(population, **kwargs):
-    chunk_size = int(math.sqrt(len(population)))
-    chunks = (population[i:i + chunk_size] for i in range(0, len(population), chunk_size))
-
-    champions = map(lambda chunk: max(chunk, key=operator.itemgetter("fitness")), chunks)
-
-    cross_child_partial = partial(cross_child, **kwargs)
-    childs = list(map(cross_child_partial, *zip(*itertools.permutations(champions, 2))))
-    return childs
-
-
-def cross_child(child1, child2, **kwargs):
-    crossover_point = min(len(child1["heuristics"]), len(child2["heuristics"])) // 2 - 1
-    child = child1["heuristics"][:crossover_point] + child2["heuristics"][crossover_point + 1:]
-    child = fit_generated_child(child, **kwargs)
-    return child
 
 
 def fit_generated_child(child, **kwargs):
@@ -130,10 +111,34 @@ def simple_state_generator_hyper_ksp(state, heuristics_candidates, **kwargs):
     return state
 
 
+def selection_hyper_ksp(population):
+    chunk_size = 2
+    chunks = (population[i:i + chunk_size] for i in range(0, len(population), chunk_size))
+
+    champions = list(map(lambda chunk: max(chunk, key=operator.itemgetter("fitness")), chunks))
+    return champions
+
+
+def crossover_reproduction_hyper_ksp(population, **kwargs):
+    k = 14
+    candidates = list(sorted(population, key=operator.itemgetter("fitness"), reverse=True))[len(population) - k:]
+    cross_child_partial = partial(cross_child, **kwargs)
+    pool = Pool()
+    childs = pool.map(cross_child_partial, *zip(*itertools.permutations(candidates, 2)))
+    return childs
+
+
+def cross_child(child1, child2, **kwargs):
+    crossover_point = min(len(child1["heuristics"]), len(child2["heuristics"])) // 2 - 1
+    child = child1["heuristics"][:crossover_point] + child2["heuristics"][crossover_point + 1:]
+    child = fit_generated_child(child, **kwargs)
+    return child
+
+
 def mutation_hyper_multi_ksp(state, **kwargs):
     return mutation_hyper_ksp(state, heuristics)
 
 
 def minimize(**kwargs):
-    return gene.minimize(initial_population_generator_hyper_ksp_multiproc, crossover_reproduction_hyper_ksp,
-                         mutation_hyper_multi_ksp, fitness_hyper_ksp, **kwargs)
+    return gene.minimize(initial_population_generator_hyper_ksp_multiproc, selection_hyper_ksp,
+                         crossover_reproduction_hyper_ksp, mutation_hyper_multi_ksp, fitness_hyper_ksp, **kwargs)
