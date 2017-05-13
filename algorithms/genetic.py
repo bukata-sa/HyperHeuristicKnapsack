@@ -30,7 +30,7 @@ def minimize(initial_population_generator, selection_func, crossover_reproductio
     max_fitness_heuristics = 0
     iteration = 0
     # TODO finish condition?
-    while iteration < 10:
+    while iteration < 50:
         current_max_fitness_state_index = np.argmax([individual["fitness"] for individual in population])
         current_max_fitness = population[current_max_fitness_state_index]["fitness"]
         if max_fitness >= current_max_fitness:

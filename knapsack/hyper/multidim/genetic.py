@@ -130,8 +130,10 @@ def selection_hyper_ksp(population):
 
 
 def crossover_reproduction_hyper_ksp(population, **kwargs):
-    k = 14
-    candidates = list(sorted(population, key=operator.itemgetter("fitness"), reverse=True))[len(population) - k:]
+    fitness_sum = sum(map(operator.itemgetter("fitness"), population))
+    probabilities = list(map(lambda person: person["fitness"] / fitness_sum, population))
+    candidates = np.random.choice(population, 14, p=probabilities)
+    # candidates = np.random.choice(population, 14)
     cross_child_partial = partial(cross_child, **kwargs)
     pool = Pool()
     childs = pool.map(cross_child_partial, *zip(*itertools.permutations(candidates, 2)))

@@ -39,7 +39,6 @@ def solve(knapsack, attempts=50):
                                             sizes=knapsack["sizes"], included=start)
         fitness_current_diff = optimal_fitness - current
         print("Current:\t" + str(current))
-        print("Current:\t" + str(current_fitness))
         solved.append(fitness_current_diff)
         result += fitness_current_diff
         current_gap = 100 * (fitness_current_diff) / optimal_fitness
