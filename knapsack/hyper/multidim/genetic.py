@@ -79,18 +79,23 @@ def simple_state_generator_hyper_ksp(state, heuristics_candidates, **kwargs):
     weights = np.asarray(kwargs["weights"])
     included = np.asarray(kwargs["included"])
     sizes = np.asarray(kwargs["sizes"])
+    shortened_kwargs = dict(kwargs)
+    del shortened_kwargs["included"]
     tabooed_items_generations = [0] * len(kwargs["costs"])
 
     # select heuristics for state while not reached local maximum
-    local_max_reached_times = 0
+    max_reached_times = 0
+    max_state = None
+    max_state_fitness = 0
+
     while any(included < 1):
         probability = rnd.random()
         cumulative_probability = 0
-        for index, heuristics_candidate in enumerate(heuristics_candidates):
-            cumulative_probability += heuristics_candidate[1]
+        for heuristic_operation, heuristic_probability in heuristics_candidates:
+            cumulative_probability += heuristic_probability
             if probability <= cumulative_probability:
                 break
-        operation = heuristics_candidates[index][0]
+        operation = heuristic_operation
 
         tabooed_items = (index for index, generation in enumerate(tabooed_items_generations) if generation > 0)
         included, modified_index = operation(included, tabooed_indexes=tabooed_items, costs=kwargs["costs"],
@@ -100,15 +105,20 @@ def simple_state_generator_hyper_ksp(state, heuristics_candidates, **kwargs):
         tabooed_items_generations = list(map(lambda x: x - 1 if x > 0 else 0, tabooed_items_generations))
 
         if local_max_reached(weights, included, sizes, tabooed_items_generations):
-            local_max_reached_times += 1
-            if local_max_reached_times == 5:
+            current_max_state_fitness = problem.solve(included, **shortened_kwargs)
+            if current_max_state_fitness > max_state_fitness:
+                max_state_fitness = current_max_state_fitness
+                max_state = state[:]
+
+            max_reached_times += 1
+            if max_reached_times == 20:
                 break
             state.pop()
 
             if modified_index == -1:
                 continue
             tabooed_items_generations[modified_index] = rnd.randint(3, 7)
-    return state
+    return max_state
 
 
 def selection_hyper_ksp(population):

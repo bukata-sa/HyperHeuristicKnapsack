@@ -39,8 +39,8 @@ def minimize(initial_population_generator, selection_func, crossover_reproductio
             if max_fitness > 0:
                 print("WE FOUND A BETTER SOLUTION: " + str(current_max_fitness - max_fitness))
             max_fitness = current_max_fitness
-            max_fitness_heuristics = population[current_max_fitness_state_index]["heuristics"]
+            max_fitness_heuristics = population[current_max_fitness_state_index]["heuristics"][:]
             iteration = 0
         population = selection_func(population)
         population = crossover(population, crossover_reproduction, mutation_func, fitness_func, **kwargs)
-    return max_fitness_heuristics
+    return max_fitness_heuristics, max_fitness
