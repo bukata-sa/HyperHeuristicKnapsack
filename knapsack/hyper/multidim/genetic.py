@@ -20,7 +20,7 @@ def fitness_hyper_ksp(state, **kwargs):
     return problem.solve(included, costs=kwargs["costs"], weights=kwargs["weights"], sizes=kwargs["sizes"])
 
 
-def fit_generated_child(child, **kwargs):
+def repair_func(child, **kwargs):
     included = list(kwargs["included"])
 
     deleted_offset = 0
@@ -135,15 +135,13 @@ def crossover_reproduction_hyper_ksp(population, **kwargs):
     candidates = np.random.choice(population, 14, p=probabilities)
     # candidates = np.random.choice(population, 14)
     cross_child_partial = partial(cross_child, **kwargs)
-    pool = Pool()
-    childs = pool.map(cross_child_partial, *zip(*itertools.permutations(candidates, 2)))
+    childs = list(map(cross_child_partial, *zip(*itertools.permutations(candidates, 2))))
     return childs
 
 
 def cross_child(child1, child2, **kwargs):
     crossover_point = min(len(child1["heuristics"]), len(child2["heuristics"])) // 2 - 1
     child = child1["heuristics"][:crossover_point] + child2["heuristics"][crossover_point + 1:]
-    child = fit_generated_child(child, **kwargs)
     return child
 
 
@@ -153,4 +151,5 @@ def mutation_hyper_multi_ksp(state, **kwargs):
 
 def minimize(**kwargs):
     return gene.minimize(initial_population_generator_hyper_ksp_multiproc, selection_hyper_ksp,
-                         crossover_reproduction_hyper_ksp, mutation_hyper_multi_ksp, fitness_hyper_ksp, **kwargs)
+                         crossover_reproduction_hyper_ksp, mutation_hyper_multi_ksp, repair_func,
+                         fitness_hyper_ksp, **kwargs)

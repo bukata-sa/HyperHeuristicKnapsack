@@ -19,7 +19,7 @@ def get_heuristics():
     remove_heurs = [remove_lightest, remove_heaviest, remove_least_cost, remove_most_cost, remove_worst,
                     remove_heaviest_item_heaviest_condition, remove_lightest_item_heaviest_condition,
                     remove_heaviest_item_lightest_condition, remove_lightest_item_lightest_condition]
-    remove_heurs = list(zip(remove_heurs, [0.3 / len(remove_heurs)] * len(remove_heurs)))
+    remove_heurs = list(zip(remove_heurs, [0.2 / len(remove_heurs)] * len(remove_heurs)))
     cached_heuristics = add_heurs + remove_heurs
     return cached_heuristics
 
