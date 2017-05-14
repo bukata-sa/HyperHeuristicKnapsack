@@ -111,7 +111,7 @@ def simple_state_generator_hyper_ksp(state, heuristics_candidates, **kwargs):
                 max_state = state[:]
 
             max_reached_times += 1
-            if max_reached_times == 20:
+            if max_reached_times == 50:
                 break
             state.pop()
 

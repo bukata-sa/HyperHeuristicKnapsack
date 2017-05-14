@@ -170,10 +170,16 @@ def calculate_relative_weights(weights, sizes):
     weights = np.asarray(weights)
     sizes = np.asarray(sizes)
     properties = zip(sizes, weights)
-    properties = list(map(lambda x: x[0] / x[1], properties))
+    properties = list(map(safe_divide, properties))
     properties = np.sum(properties, axis=0)
     return properties
 
 
 def weight_cost_priority_list(costs, weights):
     return map(lambda x: x[0] * x[1], zip(costs, weights))
+
+
+def safe_divide(a_b):
+    a = a_b[0]
+    b = list(map(lambda x: x if x > 0 else 0.001, a_b[1]))
+    return a / b
