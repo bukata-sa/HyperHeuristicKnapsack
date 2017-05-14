@@ -89,13 +89,8 @@ def simple_state_generator_hyper_ksp(state, heuristics_candidates, **kwargs):
     max_state_fitness = 0
 
     while any(included < 1):
-        probability = rnd.random()
-        cumulative_probability = 0
-        for heuristic_operation, heuristic_probability in heuristics_candidates:
-            cumulative_probability += heuristic_probability
-            if probability <= cumulative_probability:
-                break
-        operation = heuristic_operation
+        heuristics_candidates_items, heuristics_candidates_probabilities = zip(*heuristics_candidates)
+        operation = np.random.choice(list(heuristics_candidates_items), p=list(heuristics_candidates_probabilities))
 
         tabooed_items = (index for index, generation in enumerate(tabooed_items_generations) if generation > 0)
         included, modified_index = operation(included, tabooed_indexes=tabooed_items, costs=kwargs["costs"],
