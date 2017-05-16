@@ -1,6 +1,7 @@
 import itertools
 import operator
 import random as rnd
+import time
 from functools import partial
 
 import numpy as np
@@ -75,10 +76,54 @@ def local_max_reached(weights, included, sizes, tabooed_items):
     return reached
 
 
+def pick_heuristic_random(heuristics_candidates):
+    heuristics_candidates_items, heuristics_candidates_probabilities = zip(*heuristics_candidates)
+    operation = np.random.choice(list(heuristics_candidates_items), p=list(heuristics_candidates_probabilities))
+    return operation
+
+
+class ChoiceFunction:
+    __choice_function1 = {}
+    __choice_function2 = {}
+    __choice_function3 = {}
+
+    def __init__(self, heuristic_candidates):
+        self.__heuristic_candidates = heuristic_candidates
+        self.alpha = 0.4
+        self.beta = 0.4
+        self.gamma = 0.2
+
+    def calculate_heuristic_rang(self, heuristic):
+        func1_value = self.__choice_function1.get(heuristic, 0)
+        func2_value = self.__choice_function2.get(heuristic, 0)
+        func3_value = self.__choice_function3.get(heuristic, 10000)
+        return heuristic[0], self.alpha * func1_value + self.beta * func2_value + self.gamma * func3_value
+
+    def pick_heuristic(self):
+        heuristics_priorities = map(self.calculate_heuristic_rang, self.__heuristic_candidates)
+        heuristics_priorities = list(sorted(heuristics_priorities, key=operator.itemgetter(1)))
+        best_heuristic_priority = heuristics_priorities[-1][1]
+        top_priority_heuristics = [heuristic[0] for heuristic in heuristics_priorities if
+                                   heuristic[1] == best_heuristic_priority]
+        return np.random.choice(top_priority_heuristics)
+
+    def recalculate_choice_functions(self, heuristic, previous_heuristic, time_taken, heuristic_impact):
+        self.__choice_function1[heuristic] = self.__choice_function1.get(heuristic, 0) * self.alpha + heuristic_impact
+
+        if previous_heuristic is not None:
+            self.__choice_function2[(previous_heuristic, heuristic)] = \
+                self.__choice_function2.get((previous_heuristic, heuristic), 0) * self.beta + heuristic_impact
+
+        self.__choice_function3.update(
+            {heuristic: iterations + 1 for heuristic, iterations in self.__choice_function3.items()})
+        self.__choice_function3[heuristic] = 0
+
+
 def simple_state_generator_hyper_ksp(state, heuristics_candidates, **kwargs):
     weights = np.asarray(kwargs["weights"])
     included = np.asarray(kwargs["included"])
     sizes = np.asarray(kwargs["sizes"])
+
     shortened_kwargs = dict(kwargs)
     del shortened_kwargs["included"]
     tabooed_items_generations = [0] * len(kwargs["costs"])
@@ -87,14 +132,22 @@ def simple_state_generator_hyper_ksp(state, heuristics_candidates, **kwargs):
     max_reached_times = 0
     max_state = None
     max_state_fitness = 0
+    previous_knapsack_fitness = 0
 
+    heuristic_picker = ChoiceFunction(heuristics_candidates)
     while any(included < 1):
-        heuristics_candidates_items, heuristics_candidates_probabilities = zip(*heuristics_candidates)
-        operation = np.random.choice(list(heuristics_candidates_items), p=list(heuristics_candidates_probabilities))
-
+        operation = heuristic_picker.pick_heuristic()
         tabooed_items = (index for index, generation in enumerate(tabooed_items_generations) if generation > 0)
+        current_time = time.perf_counter()
         included, modified_index = operation(included, tabooed_indexes=tabooed_items, costs=kwargs["costs"],
                                              weights=kwargs["weights"], sizes=kwargs["sizes"])
+        heuristic_completion_time = time.perf_counter() - current_time
+
+        current_knapsack_fitness = problem.solve(included, **shortened_kwargs)
+        heuristic_picker.recalculate_choice_functions(operation, state[-1] if len(state) > 0 else None,
+                                                      heuristic_completion_time,
+                                                      current_knapsack_fitness - previous_knapsack_fitness)
+        previous_knapsack_fitness = current_knapsack_fitness
 
         state.append(operation)
         tabooed_items_generations = list(map(lambda x: x - 1 if x > 0 else 0, tabooed_items_generations))
