@@ -1,3 +1,5 @@
+import pickle
+
 import numpy as np
 from cvxpy import *
 
@@ -65,26 +67,28 @@ def ksp_solve_lp_relaxed_convex(costs, weights, sizes):
 
 
 if __name__ == '__main__':
-    # knapsacks = io.parse_mknapcb(mknapcbs_pathes, mknapres_path)
-    knapsacks = io.parse_mknap1(mknap1_path)
+    knapsackses = io.parse_mknapcb(mknapcbs_pathes, mknapres_path)
+    # knapsacks = io.parse_mknap1(mknap1_path)
     # lp_optimals = [lp.ksp_solve_lp_relaxed_greedy(**knapsack) for knapsack in knapsacks]
     optimals = []
     results = []
     ksp_number = 0
-    for knapsack in knapsacks[len(knapsacks) - 2:]:
-        print("KNAPSACK:")
-        print("Number of constraints: " + str(len(knapsack["sizes"])))
-        print("Number of items: " + str(len(knapsack["costs"])))
-        print(ksp_solve_lp_relaxed_convex(knapsack["costs"], knapsack["weights"], knapsack["sizes"]))
-        solved, normalized = solve(knapsack, attempts=10)
-        optimals.append(normalized)
-        # with open("resources/output/mknapcbs/mknapcb2_out_" + str(ksp_number) + ".pckl", 'wb') as out:
-        #     pickle.dump({
-        #         "const": len(knapsack["sizes"]),
-        #         "items": len(knapsack["costs"]),
-        #         "solved": solved,
-        #         "normalized:": normalized
-        #     }, out)
-        ksp_number += 1
-        print()
+    for index, knapsacks in enumerate(knapsackses):
+        for knapsack in knapsacks:
+            print("KNAPSACK:")
+            print("Number of constraints: " + str(len(knapsack["sizes"])))
+            print("Number of items: " + str(len(knapsack["costs"])))
+            print(ksp_solve_lp_relaxed_convex(knapsack["costs"], knapsack["weights"], knapsack["sizes"]))
+            solved, normalized = solve(knapsack, attempts=10)
+            optimals.append(normalized)
+            with open("resources/output/mknapcbs/mknapcb" + str(index) + "_out_" + str(ksp_number) + ".pckl",
+                      'wb') as out:
+                pickle.dump({
+                    "const": len(knapsack["sizes"]),
+                    "items": len(knapsack["costs"]),
+                    "solved": solved,
+                    "normalized:": normalized
+                }, out)
+            ksp_number += 1
+            print()
     print("CUMULATIVE GAP OVER ALL TEST DATA: " + str(optimals))
